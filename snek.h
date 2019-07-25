@@ -9,7 +9,8 @@ class Snek
 public:
 	Snek(const Map& map);
 
-	void update(std::vector<Snek>& snakes, const Map& map, int index);
+	void update(std::vector<Snek>& snakes, const Map& map, int index, std::vector<Point>& foods);
+	void checkFood(std::vector<Point>& foods);
 	void draw(sf::RenderWindow& window, std::vector<Snek>& snakes, const Map& map);
 	void setRotAngle(float rad);
 	void setRotSpeed(float speed);

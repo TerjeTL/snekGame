@@ -14,7 +14,7 @@ public:
 	void draw();
 	void update();
 	void eventHandler(sf::Event events);
-	void checkFood();
+	void spawnFood();
 	bool running;
 	Map area;
 
@@ -23,8 +23,10 @@ private:
 	std::vector<Snek> snakes;
 	int w, h;
 	int activatorSize;
+	int colors[4][3] = { {0, 255, 0},  {255, 0, 0}, {255, 0, 255}, {0, 255, 255} };
 	sf::RenderWindow window;
 	sf::Clock spawnClock;
 	std::vector<Food> foodVec;
+	std::vector<Point> foods;
 };
 
