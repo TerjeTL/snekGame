@@ -114,6 +114,7 @@ void Program::draw()
 			{
 				snakes[i].points.clear();
 				snakes[i].resetPos(area);
+				foods.clear();
 				snakes[i].snekRekt = false;
 			}
 			break;
