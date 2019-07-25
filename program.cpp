@@ -2,13 +2,13 @@
 #include "snek.h"
 
 
-Program::Program(int width, int height) : w(width), h(height), window(sf::VideoMode(width, height), "SFML Test"), area(width, height, height - 100, 5)
+Program::Program(int width, int height) : w(width), h(height), window(sf::VideoMode(width, height), "SFML Test"), area(width, height, height - 100, 5),
+activatorSize(6), running(true)
 {
 	snakes.push_back(Snek(area));
 	snakes[0].body.setFillColor(sf::Color::Green);
 	/*snakes.push_back(Snek(area));
 	snakes[1].body.setFillColor(sf::Color::Red);*/
-	running = true;
 }
 
 int Program::mainLoop()
@@ -76,6 +76,81 @@ int Program::mainLoop()
 	}
 }
 
+void Program::checkFood()
+
+{
+	for (int i = 0; i < snakes.size(); i++)
+	{
+		for (int j = 0; j < snakes[i].points.size(); j++)
+		{
+			for (int k = 0; k < foodVec.size(); k++)
+			{
+				if (distance(snakes[i].points[j].position, foodVec[k].activatorPoint) < snakes[i].bodySize + activatorSize)
+				{
+					switch (foodVec[k].ident)
+					{
+					case 0:
+						snakes[i].speedSnek(1);
+						std::cout << "speed" << std::endl;
+						break;
+
+					case 1:
+						snakes[i].speedSnek(-1);
+						break;
+
+					case 2: //fat snek
+						snakes[i].fatSnek(1);
+						break;
+
+					case 3: //skinny snek
+						snakes[i].fatSnek(-1);
+						break;
+					}
+					foodVec.erase(foodVec.begin() + k);
+				}
+			}
+		}
+	}
+
+	for (int i = 0; i < foodVec.size(); i++)
+	{
+		std::cout << i << std::endl;
+	}
+
+	if (spawnClock.getElapsedTime().asSeconds() > 3)
+	{
+		Vec2f position;
+		position.x = randomInt(area.origin.x, area.origin.x + area.size);
+		position.y = randomInt(area.origin.y, area.origin.y + area.size);
+
+		int rand = randomInt(0, 3);
+
+		if (rand == 0)
+		{	//fass boii
+			Food speedyBoi(0, position, activatorSize, sf::Color::Green);
+			foodVec.push_back(speedyBoi);
+		}
+		else if (rand == 1)
+		{ //slow boii
+			Food slowBoi(1, position, activatorSize, sf::Color::Red);
+			foodVec.push_back(slowBoi);
+		}
+		else if (rand == 2) //fat snek
+		{
+			Food fatBoi(2, position, activatorSize, sf::Color::Magenta);
+			foodVec.push_back(fatBoi);
+		}
+		else if (rand == 3)
+		{	//skinny snek
+			Food skinnyBoi(3, position, activatorSize, sf::Color::Cyan);
+			foodVec.push_back(skinnyBoi);
+		}
+
+
+		spawnClock.restart();
+	}
+}
+
 
 void Program::update()
 {
@@ -84,14 +159,12 @@ void Program::update()
 		snakes[i].update(snakes, area, i);
 	}
 
-	gameEvents.update(area, snakes);
+	checkFood();
 }
 
 void Program::draw()
 {
 	area.draw(window);
-
-	gameEvents.draw(window);
 
 	for (int i = 0; i < snakes.size(); i++)
 	{
@@ -100,7 +173,7 @@ void Program::draw()
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) && snakes[i].snekRekt)
 		{
 			window.clear(sf::Color::Black);
-			gameEvents.foodVec.clear();
+			foodVec.clear();
 			for (int i = 0; i < snakes.size(); i++)
 			{
 				snakes[i].points.clear();
@@ -109,6 +182,11 @@ void Program::draw()
 			}
 			break;
 		}
+	}
+
+	for (int i = 0; i < foodVec.size(); i++)
+	{
+		window.draw(foodVec[i].activator);
 	}
 }
 
@@ -127,9 +205,12 @@ void Program::eventHandler(sf::Event events)
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) rot--;
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)) rot++;
 		}
-		
+
 		snakes[i].setRotAngle(snakes[i].rotSpeed*rot);
 	}
-	
-	
+}
+
+int Program::randomInt(int min, int max)
+{
+	return rand() % (max - min + 1) + min;
 }

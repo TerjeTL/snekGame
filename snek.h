@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include <Maths.h>
 #include "map.h"
+#include "Point.h"
 
 class Snek
 {
@@ -26,7 +27,7 @@ public:
 	float speed;
 	float rotSpeed;
 
-	std::vector<Vec2f> points;
+	std::vector<Point> points;
 	sf::CircleShape body;
 
 	Vec2f position;

@@ -2,26 +2,29 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <vector>
-#include "functions.h"
 #include "snek.h"
 #include "map.h"
+#include "food.h"
 class Program
 {
 public:
-	class Functions;
 	Program(int width, int height);
 	int mainLoop();
+	int randomInt(int min, int max);
 	void draw();
 	void update();
 	void eventHandler(sf::Event events);
+	void checkFood();
 	bool running;
 	Map area;
 
 private:
-	Functions gameEvents;
 	//void startGame(), addSnek();
 	std::vector<Snek> snakes;
 	int w, h;
+	int activatorSize;
 	sf::RenderWindow window;
+	sf::Clock spawnClock;
+	std::vector<Food> foodVec;
 };
 

@@ -1,10 +1,8 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <Maths.h>
-#include "map.h"
-#include "snek.h"
-#include "program.h"
-#include "food.h"
+/*
+
 
 class Functions
 {
@@ -19,3 +17,4 @@ public:
 	sf::Clock spawnClock;
 	int randomInt(int min, int max);
 };
+*/

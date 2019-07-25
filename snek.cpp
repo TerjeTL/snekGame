@@ -6,7 +6,7 @@ Snek::Snek(const Map& map) : bodySize(3), body(3, 70), rotAngle(0.0), dist(0), s
 {
 	snekRekt, allowedToMakePoint = false, true;
 	body.setOrigin(sf::Vector2f(3, 3));
-	points.push_back(position);
+	points.push_back(Point(position, SNAKE, 3));
 	randSpacer = 0.6;
 	randDist = 20;
 	resetPos(map);
@@ -36,12 +36,13 @@ void Snek::update(std::vector<Snek>& snakes, const Map& map, int index)
 	}
 	else
 	{
-		points.push_back(position);
+		points.push_back(Point(position, SNAKE, bodySize));
 	}
 	dist += distance(prev, position);
 	//std::cout << snek.dist << std::endl;
 	prev = position;
 
+	edges(map);
 
 	snekRektOmeter(snakes, index);
 
@@ -75,7 +76,8 @@ void Snek::draw(sf::RenderWindow& window, std::vector<Snek>& snakes, const Map& 
 
 	for (int i = 0; i < points.size(); i++)
 	{
-		body.setPosition(points[i].x, points[i].y);
+		body.setRadius(points[i].radius);
+		body.setPosition(points[i].position.x, points[i].position.y);
 		window.draw(body);
 	}
 	body.setPosition({ position.x, position.y });
@@ -123,7 +125,8 @@ void Snek::snekRektOmeter(std::vector<Snek>& snakes, int index)
 		for (int j = 0; j < snakes[i].points.size() - end && start; j++)
 
 		{
-			if (distanceSquared(position, snakes[i].points[j]) < 30.25f)
+			Point point = snakes[i].points[j];
+			if (distanceSquared(position, point.position) < pow(bodySize + point.radius, 2))
 			{
 				snekRekt = true;
 				break;

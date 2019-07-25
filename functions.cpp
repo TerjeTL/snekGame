@@ -1,7 +1,7 @@
 #include <Maths.h>
 #include <math.h>
 #include "functions.h"
-
+/*
 Functions::Functions()
 {
 	spawnClock.restart();
@@ -101,3 +101,4 @@ int Functions::randomInt(int min, int max)
 {
 	return rand() % (max - min + 1) + min;
 }
+*/
