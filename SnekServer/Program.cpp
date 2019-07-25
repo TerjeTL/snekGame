@@ -6,6 +6,18 @@ Program::Program()
 
 }
 
+Program::~Program()
+
+{
+	for (int i = 0; i < sockets.size(); i++)
+
+	{
+		delete sockets[i];
+	}
+
+	sockets.clear();
+}
+
 int Program::mainLoop()
 
 {
@@ -38,31 +50,48 @@ void Program::server()
 	listener.listen(5000);
 	selector.add(listener);
 	
-	
 	while (!quit)
 
 	{
 		if (selector.wait())
 
 		{
-			
 			if (selector.isReady(listener))
 
 			{
+				std::cout << "listener" << std::endl;
 				mtx.lock();
 				sf::TcpSocket* newClient = new sf::TcpSocket;
+				Socket* socket = new Socket(newClient);
 				if (listener.accept(*newClient) == sf::Socket::Done)
 
 				{
-					sockets.push_back(newClient);
+					sockets.push_back(socket);
+					std::string s;
+					generateID(s);
+
+					if (!checkID(s))
+
+					{
+						while (!checkID(s))
+
+						{
+							generateID(s);
+						}
+					}
+
+					sockets[sockets.size() - 1]->id = s;
+
 					selector.add(*newClient);
-					std::cout << "New client connected: " << sockets[sockets.size() - 1]->getRemoteAddress() << std::endl;
+					//std::cout << "1" << std::endl;
+					std::cout << "New client connected: " << sockets[sockets.size() - 1]->socket->getRemoteAddress() << " with id " << sockets[sockets.size() - 1]->id << std::endl;
+					std::cout << sockets.size() << " clients connected!" << std::endl;
 				}
 
 				else
 
 				{
-					delete newClient;
+					delete socket;
 				}
 				mtx.unlock();
 			}
@@ -70,18 +99,45 @@ void Program::server()
 			else
 
 			{
+				int index = -1;
 				for (int i = 0; i < sockets.size(); i++)
 
 				{
-					if (selector.isReady(*sockets[i]))
+					//std::size_t dummy;
+					//if (sockets[i]->socket->receive(&dummy, 0, dummy) == sf::Socket::Disconnected)
+					//
+					//{
+					//	delete sockets[i];
+					//	index = i;
+					//}
+
+
+
+					if (selector.isReady(*(sockets[i]->socket)))
 
 					{
 						sf::Packet recievePacket;
 						mtx.lock();
-						sockets[i]->receive(recievePacket);
+						if (sockets[i]->socket->receive(recievePacket) == sf::Socket::Disconnected)
+
+						{
+							std::cout << sockets[i]->id << " disconnected!" << std::endl;
+							selector.remove(*sockets[i]->socket);
+							delete sockets[i];
+							sockets.erase(sockets.begin() + i);
+							std::cout << sockets.size() << " clients connected!" << std::endl;
+							i--;
+							
+						}
 						mtx.unlock();
 						broadcast(recievePacket, i);
 					}
+				}
+
+				if (index != -1)
+
+				{
+					sockets.erase(sockets.begin() + index);
 				}
 			}
 			
@@ -89,14 +145,46 @@ void Program::server()
 	}
 }
 
+int Program::checkID(std::string& id)
+
+{
+	for (int i = 0; i < sockets.size(); i++)
+
+	{
+		if (sockets[i]->id == id)
+
+		{
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
+void Program::generateID(std::string& id)
+
+{
+	static const char alphanum[] =
+		"0123456789"
+		"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+		"abcdefghijklmnopqrstuvwxyz";
+
+	for (int i = 0; i < 10; i++)
+
+	{
+		id += alphanum[rand() % (sizeof(alphanum) - 1)];
+	}
+}
+
 void Program::broadcast(sf::Packet& packet, int index)
 
 {
 	mtx.lock();
+	std::cout << "broadcast" << std::endl;
 	for (int i = 0; i < sockets.size(); i++)
 
 	{
-		if (index != i) sockets[i]->send(packet);
+		if (index != i) sockets[i]->socket->send(packet);
 	}
 	mtx.unlock();
 }
@@ -104,7 +192,8 @@ void Program::broadcast(sf::Packet& packet, int index)
 void Program::client()
 
 {
-	if (clientSocket.connect("192.168.0.54", 5000) == sf::Socket::Done)
+	//clientSocket.setBlocking(false);
+	if (clientSocket.connect("127.0.0.1", 5000) == sf::Socket::Done)
 
 	{
 		std::cout << "Connected\n";
@@ -117,6 +206,10 @@ void Program::client()
 
 	{
 		getInput();
+		sf::Packet packetSend;
+		packetSend << msgSend;
+		if (msgSend != "") clientSocket.send(packetSend);
+		msgSend = "";
 	}
 
 	if (thread)
@@ -143,25 +236,20 @@ void Program::getInput()
 void Program::executeThread()
 
 {
-	static std::string oldMsg;
+	//clientSocket.setBlocking(false);
 	while (!quit)
 
 	{
-		sf::Packet packetSend;
-		mtx.lock();
-		packetSend << msgSend;
-		mtx.unlock();
-		clientSocket.send(packetSend);
-
 		std::string msg;
 		sf::Packet packetRecieve;
-		clientSocket.receive(packetRecieve);
-
-		if ((packetRecieve >> msg) && oldMsg != msg && !msg.empty())
+		if (clientSocket.receive(packetRecieve) != sf::Socket::NotReady)
 
 		{
-			std::cout << "\n Other: " << msg << std::endl;
-			oldMsg = msg;
+			if ((packetRecieve >> msg) && !msg.empty())
+
+			{
+				std::cout << "\n Other: " << msg << std::endl;
+			}
 		}
 	}
 }
