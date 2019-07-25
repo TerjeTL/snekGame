@@ -37,12 +37,12 @@ void Functions::update(const Map& maps, std::vector<Snek>& snakes)
 		}
 		else if (rand == 2) //fat snek
 		{
-			Food fatBoi(0, position, activatorSize, sf::Color::Magenta);
+			Food fatBoi(2, position, activatorSize, sf::Color::Magenta);
 			foodVec.push_back(fatBoi);
 		}
 		else if (rand == 3)
 		{	//skinny snek
-			Food skinnyBoi(0, position, activatorSize, sf::Color::Cyan);
+			Food skinnyBoi(3, position, activatorSize, sf::Color::Cyan);
 			foodVec.push_back(skinnyBoi);
 		}
 		
