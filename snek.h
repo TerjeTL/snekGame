@@ -25,6 +25,7 @@ public:
 
 	int bodySize;
 	bool snekRekt;
+	bool borderSnek;
 	float speed;
 	float rotSpeed;
 
