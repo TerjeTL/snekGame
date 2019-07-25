@@ -18,7 +18,7 @@ public:
 	void edges(const Map& map);
 	float randNumber(float max, float min);
 
-	int speedSnek(int ch);
+	void speedSnek(int ch);
 	int fatSnek(int ch);
 	int randomInt(int min, int max);
 
