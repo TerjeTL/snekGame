@@ -2,7 +2,7 @@
 #include <Maths.h>
 #include <math.h>
 
-Snek::Snek(Map& map) : bodySize(3), body(3, 70), rotAngle(0.0), dist(0), snekOrigin(map.origin)
+Snek::Snek(Map& map) : bodySize(3), body(3, 70), rotAngle(0.0), dist(0), snekOrigin(map.origin), position(100, 100), velocity(1, 0)
 {
 	resetPos(map);
 	snekRekt, allowedToMakePoint = false, true;
@@ -135,12 +135,8 @@ void Snek::resetPos(const Map& map)
 {
 	position.x = randomInt(snekOrigin.x+50, (snekOrigin.x + map.size)-50);
 	position.y = randomInt(snekOrigin.y+50, (snekOrigin.y + map.size)-50);
-	int a = randomInt(-10, 10);
-	int b = randomInt(-10, 10);
-	float c = sqrtf(powf((float)a, 2.0) + powf((float)b, 2.0));
-	velocity.x = a/c;
-	velocity.y = b/c;
-	velocity = velocity * speed;
+	float angle = (float)randomInt(0, 359);
+	velocity.rotateInPlaze(PI*angle / 180.0);
 }
 
 void Snek::setRotAngle(float rad)

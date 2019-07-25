@@ -4,6 +4,8 @@
 #include "map.h"
 #include "Point.h"
 
+#define PI 3.14159
+
 class Snek
 {
 public:

@@ -8,7 +8,7 @@ Map::Map(int widthWin, int heightWin, int size, int thickness) : w(widthWin), h(
 	winInner.setPosition((widthWin - size) / 2, (heightWin - size) / 2);
 	origin.x = (widthWin - size) / 2;
 	origin.y = (heightWin - size) / 2;
-	std::cout << origin << std::endl;
+	//std::cout << origin << std::endl;
 }
 
 void Map::draw(sf::RenderWindow& window)
