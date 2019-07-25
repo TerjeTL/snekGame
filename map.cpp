@@ -15,11 +15,11 @@ void Map::draw(sf::RenderWindow& window)
 {
 	if (flashyBoarder)
 	{
-		if (flashTimer.getElapsedTime().asMilliseconds() >= 500)
+		if (flashTimer.getElapsedTime().asMilliseconds() >= 200)
 		{
 			window.draw(winOuter);
 			window.draw(winInner);
-			flashTimer.restart();
+			if (flashTimer.getElapsedTime().asMilliseconds() >= 400) flashTimer.restart();
 		}
 	}
 	else
