@@ -112,11 +112,6 @@ void Program::checkFood()
 		}
 	}
 
-	for (int i = 0; i < foodVec.size(); i++)
-	{
-		std::cout << i << std::endl;
-	}
-
 	if (spawnClock.getElapsedTime().asSeconds() > 3)
 	{
 		Vec2f position;

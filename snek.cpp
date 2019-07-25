@@ -119,8 +119,8 @@ void Snek::snekRektOmeter(std::vector<Snek>& snakes, int index)
 		if (i == index)
 
 		{
-			if (points.size() < 10) start = 0;
-			end = 10;
+			if (points.size() < 20) start = 0;
+			end = 20;
 		}
 
 		for (int j = 0; j < snakes[i].points.size() - end && start; j++)
