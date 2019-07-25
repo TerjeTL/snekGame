@@ -1,11 +1,11 @@
 #include "program.h"
-#include "snek.h"
 
 
 Program::Program(int width, int height) : w(width), h(height), window(sf::VideoMode(width, height), "SFML Test"), area(width, height, height - 100, 5),
 activatorSize(6), running(true), snek(area)
 {
 	snek.body.setFillColor(sf::Color::Green);
+	ghosts.push_back(Ghost());
 	/*snakes.push_back(Snek(area));
 	snakes[1].body.setFillColor(sf::Color::Red);*/
 
@@ -16,8 +16,8 @@ int Program::mainLoop()
 {
 	sf::Event events;
 	sf::Clock clockUpdate;
-	NetworkHandler networkHandler(mtx);
-	networkHandler.connect("127.0.0.1", 5000);
+	NetworkHandler networkHandler(mtx, snek, ghosts);
+	networkHandler.connect("82.47.120.89", 5000);
 
 	if (!window.isOpen())
 	{
@@ -40,6 +40,7 @@ int Program::mainLoop()
 		if (clockUpdate.getElapsedTime().asSeconds() >= 1.0 / 60.0 && running)
 		{
 			update();
+			networkHandler.sendPos();
 			clockUpdate.restart();
 		}
 		//if (!snakes[0].snekRekt && !snakes[1].snekRekt) running = true;
@@ -89,6 +90,12 @@ void Program::draw()
 {
 	area.draw(window);
 	snek.draw(window);
+
+	for (int i = 0; i < ghosts.size(); i++)
+
+	{
+		ghosts[i].draw(window);
+	}
 
 	sf::CircleShape food(activatorSize);
 	food.setOrigin(activatorSize, activatorSize);

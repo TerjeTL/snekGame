@@ -1,18 +1,6 @@
 #pragma once
 #include <SFML/Network.hpp>
 
-sf::Packet& operator <<(sf::Packet& packet, const MovePacket& move)
-
-{
-	return packet << move.name << move.x << move.y << move.velX << move.velY;
-}
-
-sf::Packet& operator >>(sf::Packet& packet, MovePacket move)
-
-{
-	return packet >> move.x >> move.y >> move.velX >> move.velY;
-}
-
 struct MovePacket
 
 {
@@ -31,3 +19,15 @@ struct MovePacket
 	char name[5] = "move";
 	float x, y, velX, velY;
 };
+
+sf::Packet& operator <<(sf::Packet& packet, const MovePacket& move)
+
+{
+	return packet << move.name << move.x << move.y << move.velX << move.velY;
+}
+
+sf::Packet& operator >>(sf::Packet& packet, MovePacket& move)
+
+{
+	return packet >> move.name >> move.x >> move.y >> move.velX >> move.velY;
+}

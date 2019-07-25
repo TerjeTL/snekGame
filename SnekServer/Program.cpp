@@ -59,7 +59,6 @@ void Program::server()
 			if (selector.isReady(listener))
 
 			{
-				std::cout << "listener" << std::endl;
 				mtx.lock();
 				sf::TcpSocket* newClient = new sf::TcpSocket;
 				Socket* socket = new Socket(newClient);
@@ -180,7 +179,6 @@ void Program::broadcast(sf::Packet& packet, int index)
 
 {
 	mtx.lock();
-	std::cout << "broadcast" << std::endl;
 	for (int i = 0; i < sockets.size(); i++)
 
 	{
