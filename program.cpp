@@ -1,6 +1,5 @@
 #include "program.h"
 #include "snek.h"
-#include "functions.h"
 
 
 Program::Program(int width, int height) : w(width), h(height), window(sf::VideoMode(width, height), "SFML Test"), area(width, height, height - 100, 5)
@@ -16,7 +15,6 @@ int Program::mainLoop()
 {
 	sf::Event events;
 	sf::Clock clockUpdate;
-	Functions gameEvents;
 
 	if (!window.isOpen())
 	{
@@ -35,18 +33,14 @@ int Program::mainLoop()
 			eventHandler(events);
 		}
 
+
 		if (clockUpdate.getElapsedTime().asSeconds() >= 1.0 / 60.0 && running)
 		{
-			for (int i = 0; i < snakes.size(); i++)
-			{
-				snakes[i].update(snakes, area, i);
-			}
-
-			gameEvents.update(area, snakes);
-
+			update();
 			clockUpdate.restart();
 		}
 		
+
 		int check = 0;
 		for (int j = 0; j < snakes.size(); j++)
 		{
@@ -74,31 +68,47 @@ int Program::mainLoop()
 
 		//Draw
 
-		area.draw(window);
-		
-		gameEvents.draw(window);
-
-		for (int i = 0; i < snakes.size(); i++)
-		{
-			snakes[i].draw(window, snakes, area);
-
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) && snakes[i].snekRekt)
-			{
-				window.clear(sf::Color::Black);
-				gameEvents.foodVec.clear();
-				for (int i = 0; i < snakes.size(); i++)
-				{
-					snakes[i].points.clear();
-					snakes[i].resetPos(area);
-					snakes[i].snekRekt = false;
-				}
-				break;
-			}
-		}
+		draw();
 		
 
 		//Display
 		window.display();
+	}
+}
+
+
+void Program::update()
+{
+	for (int i = 0; i < snakes.size(); i++)
+	{
+		snakes[i].update(snakes, area, i);
+	}
+
+	gameEvents.update(area, snakes);
+}
+
+void Program::draw()
+{
+	area.draw(window);
+
+	gameEvents.draw(window);
+
+	for (int i = 0; i < snakes.size(); i++)
+	{
+		snakes[i].draw(window, snakes, area);
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) && snakes[i].snekRekt)
+		{
+			window.clear(sf::Color::Black);
+			gameEvents.foodVec.clear();
+			for (int i = 0; i < snakes.size(); i++)
+			{
+				snakes[i].points.clear();
+				snakes[i].resetPos(area);
+				snakes[i].snekRekt = false;
+			}
+			break;
+		}
 	}
 }
 
