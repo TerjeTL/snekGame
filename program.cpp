@@ -9,6 +9,8 @@ activatorSize(6), running(true)
 	snakes[0].body.setFillColor(sf::Color::Green);
 	/*snakes.push_back(Snek(area));
 	snakes[1].body.setFillColor(sf::Color::Red);*/
+
+	//std::cout << colors[0][1] << std::endl;
 }
 
 int Program::mainLoop()
@@ -62,86 +64,25 @@ int Program::mainLoop()
 		
 		//clear
 		window.clear(sf::Color::Black);
-
-		//Features
-		
-
 		//Draw
-
 		draw();
-		
-
 		//Display
 		window.display();
 	}
 }
 
-void Program::checkFood()
+void Program::spawnFood()
 
 {
-	for (int i = 0; i < snakes.size(); i++)
-	{
-		for (int j = 0; j < snakes[i].points.size(); j++)
-		{
-			for (int k = 0; k < foodVec.size(); k++)
-			{
-				if (distance(snakes[i].points[j].position, foodVec[k].activatorPoint) < snakes[i].bodySize + activatorSize)
-				{
-					switch (foodVec[k].ident)
-					{
-					case 0:
-						snakes[i].speedSnek(1);
-						std::cout << "speed" << std::endl;
-						break;
-
-					case 1:
-						snakes[i].speedSnek(-1);
-						break;
-
-					case 2: //fat snek
-						snakes[i].fatSnek(1);
-						break;
-
-					case 3: //skinny snek
-						snakes[i].fatSnek(-1);
-						break;
-					}
-					foodVec.erase(foodVec.begin() + k);
-				}
-			}
-		}
-	}
 
 	if (spawnClock.getElapsedTime().asSeconds() > 3)
 	{
 		Vec2f position;
 		position.x = randomInt(area.origin.x, area.origin.x + area.size);
 		position.y = randomInt(area.origin.y, area.origin.y + area.size);
+		int type = randomInt(1, 4);
 
-		int rand = randomInt(0, 3);
-
-		if (rand == 0)
-		{	//fass boii
-			Food speedyBoi(0, position, activatorSize, sf::Color::Green);
-			foodVec.push_back(speedyBoi);
-		}
-		else if (rand == 1)
-		{ //slow boii
-			Food slowBoi(1, position, activatorSize, sf::Color::Red);
-			foodVec.push_back(slowBoi);
-		}
-		else if (rand == 2) //fat snek
-		{
-			Food fatBoi(2, position, activatorSize, sf::Color::Magenta);
-			foodVec.push_back(fatBoi);
-		}
-		else if (rand == 3)
-		{	//skinny snek
-			Food skinnyBoi(3, position, activatorSize, sf::Color::Cyan);
-			foodVec.push_back(skinnyBoi);
-		}
-
-
+		foods.push_back(Point(position, type, activatorSize));
 		spawnClock.restart();
 	}
 }
@@ -151,10 +92,10 @@ void Program::update()
 {
 	for (int i = 0; i < snakes.size(); i++)
 	{
-		snakes[i].update(snakes, area, i);
+		snakes[i].update(snakes, area, i, foods);
 	}
 
-	checkFood();
+	spawnFood();
 }
 
 void Program::draw()
@@ -179,9 +120,16 @@ void Program::draw()
 		}
 	}
 
-	for (int i = 0; i < foodVec.size(); i++)
+	sf::CircleShape food(activatorSize);
+	food.setOrigin(activatorSize, activatorSize);
+
+	for (int i = 0; i < foods.size(); i++)
+
 	{
-		window.draw(foodVec[i].activator);
+		sf::Color color(colors[foods[i].type - 1][0], colors[foods[i].type - 1][1], colors[foods[i].type - 1][2]);
+		food.setFillColor(color);
+		food.setPosition(foods[i].position.x, foods[i].position.y);
+		window.draw(food);
 	}
 }
 

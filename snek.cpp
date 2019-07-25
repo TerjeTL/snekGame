@@ -14,7 +14,7 @@ Snek::Snek(const Map& map) : bodySize(3), body(3, 70), rotAngle(0.0), dist(0), s
 	speed = 2.0f;
 }
 
-void Snek::update(std::vector<Snek>& snakes, const Map& map, int index)
+void Snek::update(std::vector<Snek>& snakes, const Map& map, int index, std::vector<Point>& foods)
 {
 	body.setRadius(bodySize);
 	velocity.rotateInPlaze(rotAngle);
@@ -42,6 +42,7 @@ void Snek::update(std::vector<Snek>& snakes, const Map& map, int index)
 	//std::cout << snek.dist << std::endl;
 	prev = position;
 
+	checkFood(foods);
 	edges(map);
 
 	snekRektOmeter(snakes, index);
@@ -58,6 +59,40 @@ void Snek::update(std::vector<Snek>& snakes, const Map& map, int index)
 
 	if (snekRekt) {
 		std::cout << "snek ded" << std::endl;
+	}
+}
+
+void Snek::checkFood(std::vector<Point>& foods)
+
+{
+	for (int j = 0; j < points.size(); j++)
+	{
+		for (int k = 0; k < foods.size(); k++)
+		{
+			if (distanceSquared(points[j].position, foods[k].position) < pow(bodySize + foods[k].radius, 2))
+			{
+				switch (foods[k].type)
+				{
+				case FAST:
+					speedSnek(1);
+					std::cout << "speed" << std::endl;
+					break;
+
+				case SLOW:
+					speedSnek(-1);
+					break;
+
+				case FAT: //fat snek
+					fatSnek(1);
+					break;
+
+				case THIN: //skinny snek
+					fatSnek(-1);
+					break;
+				}
+				foods.erase(foods.begin() + k);
+			}
+		}
 	}
 }
 
