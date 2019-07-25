@@ -10,7 +10,10 @@ public:
 	Vec2i origin;
 	void update();
 	void draw(sf::RenderWindow& window);
+	void papersPleaseDisabled(int ch);
+	bool flashyBoarder;
 private:
+	sf::Clock boarderControl, flashTimer;
 	sf::RectangleShape winOuter;
 	sf::RectangleShape winInner;
 };

@@ -23,7 +23,7 @@ private:
 	std::vector<Snek> snakes;
 	int w, h;
 	int activatorSize;
-	int colors[4][3] = { {0, 255, 0},  {255, 0, 0}, {255, 0, 255}, {0, 255, 255} };
+	int colors[5][3] = { {0, 255, 0},  {255, 0, 0}, {255, 0, 255}, {0, 255, 255}, {255, 160, 60} };
 	sf::RenderWindow window;
 	sf::Clock spawnClock;
 	std::vector<Food> foodVec;

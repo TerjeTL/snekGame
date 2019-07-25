@@ -7,16 +7,16 @@
 class Snek
 {
 public:
-	Snek(const Map& map);
+	Snek(Map& map);
 
-	void update(std::vector<Snek>& snakes, const Map& map, int index, std::vector<Point>& foods);
-	void checkFood(std::vector<Point>& foods);
+	void update(std::vector<Snek>& snakes, Map& map, int index, std::vector<Point>& foods);
+	void checkFood(std::vector<Point>& foods, Map& map);
 	void draw(sf::RenderWindow& window, std::vector<Snek>& snakes, const Map& map);
 	void setRotAngle(float rad);
 	void setRotSpeed(float speed);
 	void resetPos(const Map& map);
 	void snekRektOmeter(std::vector<Snek>& snakes, int index);
-	void edges(const Map& map);
+	void edges(Map& map);
 	float randNumber(float max, float min);
 
 	int speedSnek(int ch);
@@ -25,7 +25,6 @@ public:
 
 	int bodySize;
 	bool snekRekt;
-	bool borderSnek;
 	float speed;
 	float rotSpeed;
 

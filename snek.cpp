@@ -2,19 +2,19 @@
 #include <Maths.h>
 #include <math.h>
 
-Snek::Snek(const Map& map) : bodySize(3), body(3, 70), rotAngle(0.0), dist(0), snekOrigin(map.origin), borderSnek(false)
+Snek::Snek(Map& map) : bodySize(3), body(3, 70), rotAngle(0.0), dist(0), snekOrigin(map.origin)
 {
+	resetPos(map);
 	snekRekt, allowedToMakePoint = false, true;
 	body.setOrigin(sf::Vector2f(3, 3));
 	points.push_back(Point(position, SNAKE, 3));
 	randSpacer = 0.6;
 	randDist = 20;
-	resetPos(map);
 	rotSpeed = 0.08;
 	speed = 2.0f;
 }
 
-void Snek::update(std::vector<Snek>& snakes, const Map& map, int index, std::vector<Point>& foods)
+void Snek::update(std::vector<Snek>& snakes, Map& map, int index, std::vector<Point>& foods)
 {
 	body.setRadius(bodySize);
 	velocity.rotateInPlaze(rotAngle);
@@ -42,7 +42,7 @@ void Snek::update(std::vector<Snek>& snakes, const Map& map, int index, std::vec
 	//std::cout << snek.dist << std::endl;
 	prev = position;
 
-	checkFood(foods);
+	checkFood(foods, map);
 	edges(map);
 
 	snekRektOmeter(snakes, index);
@@ -59,7 +59,7 @@ void Snek::update(std::vector<Snek>& snakes, const Map& map, int index, std::vec
 	}
 }
 
-void Snek::checkFood(std::vector<Point>& foods)
+void Snek::checkFood(std::vector<Point>& foods, Map& map)
 
 {
 	for (int j = 0; j < points.size(); j++)
@@ -87,6 +87,9 @@ void Snek::checkFood(std::vector<Point>& foods)
 				case THIN: //skinny snek
 					fatSnek(-1);
 					break;
+				case BORDER: //flashy travely boarders
+					map.papersPleaseDisabled(1);
+					break;
 				}
 				foods.erase(foods.begin() + k);
 			}
@@ -94,10 +97,12 @@ void Snek::checkFood(std::vector<Point>& foods)
 	}
 }
 
-void Snek::edges(const Map& map)
+void Snek::edges(Map& map)
 
 {
-	if (borderSnek)
+	map.papersPleaseDisabled(0);
+
+	if (map.flashyBoarder)
 	{
 		if ((position.x + bodySize) > (snekOrigin.x + map.size)) position.x = snekOrigin.x + bodySize;
 		else if ((position.x - bodySize) < snekOrigin.x) position.x = snekOrigin.x + map.size - bodySize;
