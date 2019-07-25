@@ -104,7 +104,7 @@ void Program::broadcast(sf::Packet& packet, int index)
 void Program::client()
 
 {
-	if (clientSocket.connect("192.168.0.54", 5000) == sf::Socket::Done)
+	if (clientSocket.connect("127.0.0.1", 5000) == sf::Socket::Done)
 
 	{
 		std::cout << "Connected\n";

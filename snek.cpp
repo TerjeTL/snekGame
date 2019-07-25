@@ -267,18 +267,16 @@ int Snek::fatSnek(int ch)
 	{
 		if (ch == 0)
 		{
-			if (bodySize <  && bodySize > 1.9)
+			if (bodySize < 4.9  && bodySize > 1.1)
 			{
 				bodySize = 3;
 				return 0;
 			}
-			else if (bodySize > 3.1 && bodySize < 4.9)
+			else if ((fatSnekClock.getElapsedTime().asSeconds() >= 3))
 			{
-				bodySize = 3;
-				return 0;
+			if (bodySize < 1.1) return 2;
+			else if (bodySize > 4.9) return -2;
 			}
-			else if (bodySize < 2.9) return 2;
-			else if (bodySize > 3.1) return -2;
 			else return 0;
 		}
 	}
