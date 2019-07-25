@@ -15,6 +15,7 @@ public:
 	void update();
 	void eventHandler(sf::Event events);
 	void spawnFood();
+	void reset();
 	bool running;
 	Map area;
 
@@ -26,7 +27,6 @@ private:
 	int colors[5][3] = { {0, 255, 0},  {255, 0, 0}, {255, 0, 255}, {0, 255, 255}, {255, 160, 60} };
 	sf::RenderWindow window;
 	sf::Clock spawnClock;
-	std::vector<Food> foodVec;
 	std::vector<Point> foods;
 };
 
