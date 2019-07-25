@@ -50,10 +50,9 @@ void Snek::update(std::vector<Snek>& snakes, const Map& map, int index, std::vec
 	int ch = speedSnek(0);
 	if (ch != 0) speedSnek(ch);
 
-	int t2(fatSnek(0));
-	if (t2 == -2) fatSnek(-1);
-	else if (t2 == 2) fatSnek(1);
-	else;
+	int ch = fatSnek(0);
+	if (ch != 0) fatSnek(ch);
+
 
 	if (snekRekt) {
 		std::cout << "snek ded" << std::endl;
@@ -69,6 +68,7 @@ void Snek::checkFood(std::vector<Point>& foods)
 		{
 			if (distanceSquared(points[j].position, foods[k].position) < pow(bodySize + foods[k].radius, 2))
 			{
+				std::cout << foods[k].type << std::endl;
 				switch (foods[k].type)
 				{
 				case FAST:
@@ -248,21 +248,26 @@ int Snek::fatSnek(int ch)
 	if (ch == 1)
 	{
 		bodySize += 2;
-		std::cout << "here" << std::endl;
 		fatSnekClock.restart();
 		return 0;
 	}
-	else if (ch == -1 && bodySize > 1.4)
+	else if (ch == -1 && bodySize > 2)
 	{
-		bodySize -= 1;
+		bodySize -= 2;
+		fatSnekClock.restart();
+		return 0;
+	}
+	else if (ch == -1 && bodySize < 2)
+	{
+		bodySize = 0.8;
 		fatSnekClock.restart();
 		return 0;
 	}
 	else
 	{
-		if (fatSnekClock.getElapsedTime().asSeconds() >= 3)
+		if (ch == 0)
 		{
-			if (bodySize < 2.9 && bodySize > 1.9)
+			if (bodySize <  && bodySize > 1.9)
 			{
 				bodySize = 3;
 				return 0;
@@ -273,7 +278,7 @@ int Snek::fatSnek(int ch)
 				return 0;
 			}
 			else if (bodySize < 2.9) return 2;
-			else if (bodySize> 3.1) return -2;
+			else if (bodySize > 3.1) return -2;
 			else return 0;
 		}
 	}
