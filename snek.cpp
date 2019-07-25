@@ -77,6 +77,7 @@ void Snek::draw(sf::RenderWindow& window, std::vector<Snek>& snakes, const Map& 
 	for (int i = 0; i < points.size(); i++)
 	{
 		body.setRadius(points[i].radius);
+		body.setOrigin(body.getGlobalBounds().width/2, body.getGlobalBounds().height/2);
 		body.setPosition(points[i].position.x, points[i].position.y);
 		window.draw(body);
 	}
