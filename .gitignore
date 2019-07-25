@@ -330,3 +330,5 @@ ASALocalRun/
 .mfractor/
 /SFML Test.vcxproj
 /SFML Test.vcxproj.filters
+/SnekServer/SnekServer.vcxproj.filters
+/SnekServer/SnekServer.vcxproj

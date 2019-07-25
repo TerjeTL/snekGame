@@ -14,25 +14,17 @@ Snek::Snek(const Map& map) : bodySize(3), body(3, 70), rotAngle(0.0), dist(0), s
 	speed = 2.0f;
 }
 
-void Snek::update(std::vector<Snek>& snakes, Snek& snek, const Map& map)
+void Snek::update(std::vector<Snek>& snakes, const Map& map, int index)
 {
-	snek.body.setRadius(bodySize);
-	snek.velocity.rotateInPlaze(snek.rotAngle);
-	snek.velocity = normalize(snek.velocity)*speed;
-	snek.position.x += snek.velocity.x;
-	snek.position.y += snek.velocity.y;
+	body.setRadius(bodySize);
+	velocity.rotateInPlaze(rotAngle);
+	velocity = normalize(velocity)*speed;
+	position += velocity;
 	
-	if (snek.position.x > (snekOrigin.x + map.size)) snek.position.x = snekOrigin.x;
-	else if (snek.position.x < snekOrigin.x) snek.position.x = snekOrigin.x + map.size;
-	//std::cout << map.size << std::endl;
-	if (snek.position.y > (snekOrigin.y + map.size)) snek.position.y = snekOrigin.y;
-	else if (snek.position.y < snekOrigin.y) snek.position.y = (snekOrigin.y + map.size);
-
-
-	if (snek.spacer.getElapsedTime().asSeconds() > randSpacer)
+	if (spacer.getElapsedTime().asSeconds() > randSpacer)
 	{
 		dist = 0;
-		snek.spacer.restart();
+		spacer.restart();
 		randSpacer = randNumber(1.6, 0.6);
 		//std::cout << randSpacer << std::endl;
 		randDist = randomInt(25, 7);
@@ -40,18 +32,18 @@ void Snek::update(std::vector<Snek>& snakes, Snek& snek, const Map& map)
 	}
 	if (dist < randDist)
 	{
-		snek.spacer.restart();
+		spacer.restart();
 	}
 	else
 	{
-		snek.points.push_back(snek.position);
+		points.push_back(position);
 	}
-	snek.dist += distance(prev, snek.position);
+	dist += distance(prev, position);
 	//std::cout << snek.dist << std::endl;
-	snek.prev = snek.position;
+	prev = position;
 
 
-	snekRektOmeter(snakes);
+	snekRektOmeter(snakes, index);
 
 	int t1(speedSnek(0));
 	if (t1 == -2) speedSnek(-1);
@@ -63,9 +55,19 @@ void Snek::update(std::vector<Snek>& snakes, Snek& snek, const Map& map)
 	else if (t2 == 2) fatSnek(1);
 	else;
 
-	if (snek.snekRekt) {
+	if (snekRekt) {
 		std::cout << "snek ded" << std::endl;
 	}
+}
+
+void Snek::edges(const Map& map)
+
+{
+	if (position.x > (snekOrigin.x + map.size)) position.x = snekOrigin.x;
+	else if (position.x < snekOrigin.x) position.x = snekOrigin.x + map.size;
+	//std::cout << map.size << std::endl;
+	if (position.y > (snekOrigin.y + map.size)) position.y = snekOrigin.y;
+	else if (position.y < snekOrigin.y) position.y = (snekOrigin.y + map.size);
 }
 
 void Snek::draw(sf::RenderWindow& window, std::vector<Snek>& snakes, const Map& map)
@@ -103,9 +105,33 @@ void Snek::setRotSpeed(float speed)
 	rotSpeed = speed;
 }
 
-void Snek::snekRektOmeter(std::vector<Snek>& snakes)
+void Snek::snekRektOmeter(std::vector<Snek>& snakes, int index)
 {
 	//checks if he reks himself
+	for (int i = 0; i < snakes.size(); i++)
+
+	{
+		int end = 0;
+		int start = 1;
+		if (i == index)
+
+		{
+			if (points.size() < 10) start = 0;
+			end = 10;
+		}
+
+		for (int j = 0; j < snakes[i].points.size() - end && start; j++)
+
+		{
+			if (distanceSquared(position, snakes[i].points[j]) < 30.25f)
+			{
+				snekRekt = true;
+				break;
+			}
+		}
+	}
+
+	/*
 	for (int i = 0; i < snakes.size(); i++)  // B E A U T I F U L FOR LOOP
 	{
 		if (snakes[i].points.size() > 30)
@@ -126,7 +152,7 @@ void Snek::snekRektOmeter(std::vector<Snek>& snakes)
 			{
 				for (int k = 0; k < snakes[h].points.size(); k++)
 				{
-					if (distance(snakes[i].position, snakes[h].points[k]) < 5.5f)
+					if (distanceSquared(snakes[i].position, snakes[h].points[k]) < 30.25f)
 					{
 						snakes[i].snekRekt = true;
 						break;
@@ -135,6 +161,7 @@ void Snek::snekRektOmeter(std::vector<Snek>& snakes)
 			}
 		}
 	}
+	*/
 }
 
 int Snek::speedSnek(int ch)

@@ -7,31 +7,41 @@ class Snek
 {
 public:
 	Snek(const Map& map);
-	void update(std::vector<Snek>& snakes, Snek& snek, const Map& map);
+
+	void update(std::vector<Snek>& snakes, const Map& map, int index);
 	void draw(sf::RenderWindow& window, std::vector<Snek>& snakes, const Map& map);
 	void setRotAngle(float rad);
 	void setRotSpeed(float speed);
-    Vec2f position;
-    std::vector<Vec2f> points;
-	bool snekRekt;
-	float randNumber(float max, float min);
-	int randomInt(int min, int max);
-	sf::CircleShape body;
-	int bodySize;
-	float speed;
 	void resetPos(const Map& map);
-	float rotSpeed;
-	Vec2i snekOrigin;
+	void snekRektOmeter(std::vector<Snek>& snakes, int index);
+	void edges(const Map& map);
+	float randNumber(float max, float min);
+
 	int speedSnek(int ch);
 	int fatSnek(int ch);
+	int randomInt(int min, int max);
+
+	int bodySize;
+	bool snekRekt;
+	float speed;
+	float rotSpeed;
+
+	std::vector<Vec2f> points;
+	sf::CircleShape body;
+
+	Vec2f position;
+	Vec2i snekOrigin;
 private:
-	float randSpacer;
-	int randDist;
+	
+	
 	sf::Clock spacer, speedSnekClock, fatSnekClock;
-	Vec2f velocity;
-	float rotAngle;
-	void snekRektOmeter(std::vector<Snek>& snakes);
-	float dist;
-	Vec2f prev;
+	
+	int randDist;
 	bool allowedToMakePoint;
+	float rotAngle;
+	float randSpacer;
+	float dist;
+
+	Vec2f prev;
+	Vec2f velocity;	
 };

@@ -39,7 +39,7 @@ int Program::mainLoop()
 		{
 			for (int i = 0; i < snakes.size(); i++)
 			{
-				snakes[i].update(snakes, snakes[i], area);
+				snakes[i].update(snakes, area, i);
 			}
 
 			gameEvents.update(area, snakes);

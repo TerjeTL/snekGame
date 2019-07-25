@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.28307.168
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SFML Test", "SFML Test.vcxproj", "{22202E15-9710-4D79-A247-D62362BDF54A}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SnekServer", "SnekServer\SnekServer.vcxproj", "{2235159B-7B24-43EC-8C7B-43F0FE14DAEF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,14 @@ Global
 		{22202E15-9710-4D79-A247-D62362BDF54A}.Release|x64.Build.0 = Release|x64
 		{22202E15-9710-4D79-A247-D62362BDF54A}.Release|x86.ActiveCfg = Release|Win32
 		{22202E15-9710-4D79-A247-D62362BDF54A}.Release|x86.Build.0 = Release|Win32
+		{2235159B-7B24-43EC-8C7B-43F0FE14DAEF}.Debug|x64.ActiveCfg = Debug|x64
+		{2235159B-7B24-43EC-8C7B-43F0FE14DAEF}.Debug|x64.Build.0 = Debug|x64
+		{2235159B-7B24-43EC-8C7B-43F0FE14DAEF}.Debug|x86.ActiveCfg = Debug|Win32
+		{2235159B-7B24-43EC-8C7B-43F0FE14DAEF}.Debug|x86.Build.0 = Debug|Win32
+		{2235159B-7B24-43EC-8C7B-43F0FE14DAEF}.Release|x64.ActiveCfg = Release|x64
+		{2235159B-7B24-43EC-8C7B-43F0FE14DAEF}.Release|x64.Build.0 = Release|x64
+		{2235159B-7B24-43EC-8C7B-43F0FE14DAEF}.Release|x86.ActiveCfg = Release|Win32
+		{2235159B-7B24-43EC-8C7B-43F0FE14DAEF}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
