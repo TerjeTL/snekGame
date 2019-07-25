@@ -2,7 +2,7 @@
 #include <Maths.h>
 #include <math.h>
 
-Snek::Snek(const Map& map) : bodySize(3), body(3, 70), rotAngle(0.0), dist(0), snekOrigin(map.origin)
+Snek::Snek(const Map& map) : bodySize(3), body(3, 70), rotAngle(0.0), dist(0), snekOrigin(map.origin), borderSnek(false)
 {
 	snekRekt, allowedToMakePoint = false, true;
 	body.setOrigin(sf::Vector2f(3, 3));
@@ -50,8 +50,8 @@ void Snek::update(std::vector<Snek>& snakes, const Map& map, int index, std::vec
 	int ch = speedSnek(0);
 	if (ch != 0) speedSnek(ch);
 
-	int ch = fatSnek(0);
-	if (ch != 0) fatSnek(ch);
+	int ch2 = fatSnek(0);
+	if (ch2 != 0) fatSnek(ch2);
 
 
 	if (snekRekt) {
@@ -97,11 +97,18 @@ void Snek::checkFood(std::vector<Point>& foods)
 void Snek::edges(const Map& map)
 
 {
-	if (position.x > (snekOrigin.x + map.size)) position.x = snekOrigin.x;
-	else if (position.x < snekOrigin.x) position.x = snekOrigin.x + map.size;
-	//std::cout << map.size << std::endl;
-	if (position.y > (snekOrigin.y + map.size)) position.y = snekOrigin.y;
-	else if (position.y < snekOrigin.y) position.y = (snekOrigin.y + map.size);
+	if (borderSnek)
+	{
+		if ((position.x + bodySize) > (snekOrigin.x + map.size)) position.x = snekOrigin.x + bodySize;
+		else if ((position.x - bodySize) < snekOrigin.x) position.x = snekOrigin.x + map.size - bodySize;
+		//std::cout << map.size << std::endl;
+		if ((position.y + bodySize) > (snekOrigin.y + map.size)) position.y = snekOrigin.y + bodySize;
+		else if ((position.y - bodySize) < snekOrigin.y) position.y = (snekOrigin.y + map.size - bodySize);
+	}
+	else
+	{
+		if (((position.x + bodySize) > (snekOrigin.x + map.size)) || ((position.x - bodySize) < snekOrigin.x) || ((position.y + bodySize) > (snekOrigin.y + map.size)) || ((position.y - bodySize) < snekOrigin.y)) snekRekt = true;
+	}
 }
 
 void Snek::draw(sf::RenderWindow& window, std::vector<Snek>& snakes, const Map& map)
@@ -219,7 +226,7 @@ int Snek::speedSnek(int ch)
 	}
 	else if (ch == -1 && speed < 1.1f)
 	{
-		speed = 0.4f;
+		speed = 0.8f;
 		speedSnekClock.restart();
 		return 0;
 	}
@@ -251,15 +258,15 @@ int Snek::fatSnek(int ch)
 		fatSnekClock.restart();
 		return 0;
 	}
-	else if (ch == -1 && bodySize > 2)
+	else if (ch == -1 && bodySize >= 3)
 	{
 		bodySize -= 2;
 		fatSnekClock.restart();
 		return 0;
 	}
-	else if (ch == -1 && bodySize < 2)
+	else if (ch == -1 && bodySize < 3)
 	{
-		bodySize = 0.8;
+		bodySize = 1;
 		fatSnekClock.restart();
 		return 0;
 	}
@@ -267,18 +274,16 @@ int Snek::fatSnek(int ch)
 	{
 		if (ch == 0)
 		{
-			if (bodySize <  && bodySize > 1.9)
+			if (bodySize < 4.9 && bodySize > 1.1)
 			{
 				bodySize = 3;
 				return 0;
 			}
-			else if (bodySize > 3.1 && bodySize < 4.9)
+			else if ((fatSnekClock.getElapsedTime().asSeconds() > 3))
 			{
-				bodySize = 3;
-				return 0;
+			if (bodySize < 1.1) return 1;
+			else if (bodySize > 4) return -1;
 			}
-			else if (bodySize < 2.9) return 2;
-			else if (bodySize > 3.1) return -2;
 			else return 0;
 		}
 	}
