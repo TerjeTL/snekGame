@@ -13,6 +13,7 @@ public:
 	void papersPleaseDisabled(int ch);
 	bool flashyBoarder;
 private:
+	int flashingTime, flasher;
 	sf::Clock boarderControl, flashTimer;
 	sf::RectangleShape winOuter;
 	sf::RectangleShape winInner;
