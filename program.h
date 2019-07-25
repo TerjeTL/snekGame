@@ -6,6 +6,7 @@
 #include "map.h"
 #include "food.h"
 #include "Ghost.h"
+#include "NetworkHandler.h"
 class Program
 {
 public:
@@ -30,5 +31,6 @@ private:
 	sf::RenderWindow window;
 	sf::Clock spawnClock;
 	std::vector<Point> foods;
+	sf::Mutex mtx;
 };
 

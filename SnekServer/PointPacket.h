@@ -1,16 +1,16 @@
 #pragma once
 #include <SFML/Network.hpp>
 
-sf::Packet& operator <<(sf::Packet& packet, const PointPacket& move)
+sf::Packet& operator <<(sf::Packet& packet, const PointPacket& point)
 
 {
-	//return packet << move.name << move.x << move.y << move.velX << move.velY;
+	return packet << point.name << point.x << point.y << point.type << point.radius;
 }
 
-sf::Packet& operator >>(sf::Packet& packet, PointPacket move)
+sf::Packet& operator >>(sf::Packet& packet, PointPacket point)
 
 {
-	//return packet >> move.x >> move.y >> move.velX >> move.velY;
+	return packet >> point.x >> point.y >> point.type >> point.radius;
 }
 
 struct PointPacket

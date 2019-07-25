@@ -16,6 +16,8 @@ int Program::mainLoop()
 {
 	sf::Event events;
 	sf::Clock clockUpdate;
+	NetworkHandler networkHandler(mtx);
+	networkHandler.connect("127.0.0.1", 5000);
 
 	if (!window.isOpen())
 	{
@@ -49,6 +51,8 @@ int Program::mainLoop()
 		//Display
 		window.display();
 	}
+	networkHandler.quitConnection();
+	return EXIT_SUCCESS;
 }
 
 void Program::spawnFood()
