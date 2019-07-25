@@ -47,7 +47,8 @@ void Snek::update(std::vector<Snek>& snakes, const Map& map, int index, std::vec
 
 	snekRektOmeter(snakes, index);
 
-	speedSnek(0);
+	int ch = speedSnek(0);
+	if (ch != 0) speedSnek(ch);
 
 	int t2(fatSnek(0));
 	if (t2 == -2) fatSnek(-1);
@@ -200,30 +201,43 @@ void Snek::snekRektOmeter(std::vector<Snek>& snakes, int index)
 	*/
 }
 
-void Snek::speedSnek(int ch)
+int Snek::speedSnek(int ch)
 {
 	
 	if (ch == 1)
 	{
-		speed += 2.0f;
+		speed += 1.0f;
 		speedSnekClock.restart();
+		return 0;
 	}
-	else if (ch == -1 && speed > 1.4f)
+
+	else if (ch == -1 && speed > 1.5f)
 	{
 		speed -= 1.0f;
 		speedSnekClock.restart();
+		return 0;
 	}
-	else if (ch == -1 && speed < 1.01f)
+	else if (ch == -1 && speed < 1.1f)
 	{
 		speed = 0.4f;
 		speedSnekClock.restart();
+		return 0;
 	}
 	else
 	{
-		if (speedSnekClock.getElapsedTime().asSeconds() >= 3 && ch ==0)
+		if (ch == 0)
 		{
-			if (speed < 1.9f) return 2;
-			else if (speed > 2.1f) return -2;
+			if (speed < 2.9f && speed > 1.1)
+			{
+				speed = 2.0f;
+				return 0;
+			}
+
+			else if (speedSnekClock.getElapsedTime().asSeconds() > 3)
+			{
+				if (speed < 2.0f) return 1;
+				else if (speed > 2.0f) return -1;
+			}
 			else return 0;
 		}
 	}
