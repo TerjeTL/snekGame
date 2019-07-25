@@ -19,7 +19,7 @@ void Map::draw(sf::RenderWindow& window)
 		{
 			window.draw(winOuter);
 			window.draw(winInner);
-			if (flashTimer.getElapsedTime().asMilliseconds() >= 400) flashTimer.restart();
+			if (flashTimer.getElapsedTime().asMilliseconds() >= 800) flashTimer.restart();
 		}
 	}
 	else
