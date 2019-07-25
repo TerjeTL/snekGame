@@ -105,20 +105,6 @@ void Program::draw()
 	for (int i = 0; i < snakes.size(); i++)
 	{
 		snakes[i].draw(window, snakes, area);
-
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) && snakes[i].snekRekt)
-		{
-			window.clear(sf::Color::Black);
-			foodVec.clear();
-			for (int i = 0; i < snakes.size(); i++)
-			{
-				snakes[i].points.clear();
-				snakes[i].resetPos(area);
-				foods.clear();
-				snakes[i].snekRekt = false;
-			}
-			break;
-		}
 	}
 
 	sf::CircleShape food(activatorSize);
@@ -131,6 +117,22 @@ void Program::draw()
 		food.setFillColor(color);
 		food.setPosition(foods[i].position.x, foods[i].position.y);
 		window.draw(food);
+	}
+}
+
+void Program::reset()
+
+{
+	for (int i = 0; i < snakes.size(); i++)
+	{
+		if (snakes[i].snekRekt == true)
+
+		{
+			snakes[i].points.clear();
+			snakes[i].resetPos(area);
+			snakes[i].snekRekt = false;
+			foods.clear();
+		}
 	}
 }
 
@@ -152,6 +154,19 @@ void Program::eventHandler(sf::Event events)
 
 		snakes[i].setRotAngle(snakes[i].rotSpeed*rot);
 	}
+
+	if (events.type == sf::Event::EventType::KeyPressed)
+
+	{
+		if (events.key.code == sf::Keyboard::Space)
+
+		{
+			reset();
+		}
+	}
+
+	
+
 }
 
 int Program::randomInt(int min, int max)
