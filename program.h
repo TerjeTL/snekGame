@@ -5,6 +5,7 @@
 #include "snek.h"
 #include "map.h"
 #include "food.h"
+#include "Ghost.h"
 class Program
 {
 public:
@@ -21,7 +22,8 @@ public:
 
 private:
 	//void startGame(), addSnek();
-	std::vector<Snek> snakes;
+	Snek snek;
+	std::vector<Ghost> ghosts;
 	int w, h;
 	int activatorSize;
 	int colors[5][3] = { {0, 255, 0},  {255, 0, 0}, {255, 0, 255}, {0, 255, 255}, {255, 160, 60} };

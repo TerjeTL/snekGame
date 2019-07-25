@@ -3,10 +3,9 @@
 
 
 Program::Program(int width, int height) : w(width), h(height), window(sf::VideoMode(width, height), "SFML Test"), area(width, height, height - 100, 5),
-activatorSize(6), running(true)
+activatorSize(6), running(true), snek(area)
 {
-	snakes.push_back(Snek(area));
-	snakes[0].body.setFillColor(sf::Color::Green);
+	snek.body.setFillColor(sf::Color::Green);
 	/*snakes.push_back(Snek(area));
 	snakes[1].body.setFillColor(sf::Color::Red);*/
 
@@ -41,25 +40,6 @@ int Program::mainLoop()
 			update();
 			clockUpdate.restart();
 		}
-		
-
-		int check = 0;
-		for (int j = 0; j < snakes.size(); j++)
-		{
-			if (snakes[j].snekRekt)
-			{
-				running = false;
-			}
-			else
-			{
-				check ++;
-				if (check == snakes.size())
-				{
-					running = true;
-				}
-			}
-		}
-
 		//if (!snakes[0].snekRekt && !snakes[1].snekRekt) running = true;
 		
 		//clear
@@ -90,10 +70,13 @@ void Program::spawnFood()
 
 void Program::update()
 {
-	for (int i = 0; i < snakes.size(); i++)
+	if (snek.snekRekt)
+
 	{
-		snakes[i].update(snakes, area, i, foods);
+		running = false;
 	}
+	
+	snek.update(ghosts, area, foods);
 
 	spawnFood();
 }
@@ -101,11 +84,7 @@ void Program::update()
 void Program::draw()
 {
 	area.draw(window);
-
-	for (int i = 0; i < snakes.size(); i++)
-	{
-		snakes[i].draw(window, snakes, area);
-	}
+	snek.draw(window);
 
 	sf::CircleShape food(activatorSize);
 	food.setOrigin(activatorSize, activatorSize);
@@ -123,37 +102,24 @@ void Program::draw()
 void Program::reset()
 
 {
-	for (int i = 0; i < snakes.size(); i++)
-	{
-		if (snakes[i].snekRekt == true)
+	if (snek.snekRekt == true)
 
-		{
-			snakes[i].points.clear();
-			snakes[i].resetPos(area);
-			snakes[i].snekRekt = false;
-			foods.clear();
-		}
+	{
+		snek.points.clear();
+		snek.resetPos(area);
+		snek.snekRekt = false;
+		foods.clear();
 	}
 }
 
 void Program::eventHandler(sf::Event events)
 {
-	for (int i = 0; i < snakes.size(); i++)
-	{
-		float rot = (float)0.0;
-		if (i == 0)
-		{
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) rot--;
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) rot++;
-		}
-		else
-		{
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) rot--;
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)) rot++;
-		}
 
-		snakes[i].setRotAngle(snakes[i].rotSpeed*rot);
-	}
+	float rot = (float)0.0;
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) rot--;
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) rot++;
+
+	snek.setRotAngle(rot);
 
 	if (events.type == sf::Event::EventType::KeyPressed)
 
@@ -164,9 +130,6 @@ void Program::eventHandler(sf::Event events)
 			reset();
 		}
 	}
-
-	
-
 }
 
 int Program::randomInt(int min, int max)

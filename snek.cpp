@@ -14,7 +14,7 @@ Snek::Snek(Map& map) : bodySize(3), body(3, 70), rotAngle(0.0), dist(0), snekOri
 	speed = 2.0f;
 }
 
-void Snek::update(std::vector<Snek>& snakes, Map& map, int index, std::vector<Point>& foods)
+void Snek::update(std::vector<Ghost>& ghosts, Map& map, std::vector<Point>& foods)
 {
 	body.setRadius(bodySize);
 	velocity.rotateInPlaze(rotAngle);
@@ -45,7 +45,7 @@ void Snek::update(std::vector<Snek>& snakes, Map& map, int index, std::vector<Po
 	checkFood(foods, map);
 	edges(map);
 
-	snekRektOmeter(snakes, index);
+	snekRektOmeter(ghosts);
 
 	int ch = speedSnek(0);
 	if (ch != 0) speedSnek(ch);
@@ -116,7 +116,7 @@ void Snek::edges(Map& map)
 	}
 }
 
-void Snek::draw(sf::RenderWindow& window, std::vector<Snek>& snakes, const Map& map)
+void Snek::draw(sf::RenderWindow& window)
 {
 
 	for (int i = 0; i < points.size(); i++)
@@ -141,7 +141,7 @@ void Snek::resetPos(const Map& map)
 
 void Snek::setRotAngle(float rad)
 {
-	rotAngle = rad;
+	rotAngle = rad*rotSpeed;
 }
 
 void Snek::setRotSpeed(float speed)
@@ -149,30 +149,35 @@ void Snek::setRotSpeed(float speed)
 	rotSpeed = speed;
 }
 
-void Snek::snekRektOmeter(std::vector<Snek>& snakes, int index)
+void Snek::snekRektOmeter(std::vector<Ghost>& ghosts)
 {
 	//checks if he reks himself
-	for (int i = 0; i < snakes.size(); i++)
+	for (int i = 0; i < ghosts.size(); i++)
 
 	{
-		int end = 0;
-		int start = 1;
-		if (i == index)
+		for (int j = 0; j < ghosts[i].points.size(); j++)
 
 		{
-			if (points.size() < 20) start = 0;
-			end = 20;
-		}
-
-		for (int j = 0; j < snakes[i].points.size() - end && start; j++)
-
-		{
-			Point point = snakes[i].points[j];
+			Point point = ghosts[i].points[j];
 			if (distanceSquared(position, point.position) < pow(bodySize + point.radius, 2))
 			{
 				snekRekt = true;
 				break;
 			}
+		}
+	}
+
+	int start = 1;
+	if (points.size() < 20) start = 0;
+
+	for (int i = 0; i < points.size() - 20 && start; i++)
+
+	{
+		Point point = points[i];
+		if (distanceSquared(position, point.position) < pow(bodySize + point.radius, 2))
+		{
+			snekRekt = true;
+			break;
 		}
 	}
 
