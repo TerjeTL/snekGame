@@ -328,3 +328,5 @@ ASALocalRun/
 
 # MFractors (Xamarin productivity tool) working folder 
 .mfractor/
+/SFML Test.vcxproj
+/SFML Test.vcxproj.filters
