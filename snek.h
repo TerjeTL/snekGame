@@ -36,7 +36,8 @@ public:
 	std::vector<Point> points;
 	sf::CircleShape body;
 	sf::Clock squareSnekTimer;
-
+	
+	Vec2f velocity;	
 	Vec2f position;
 	Vec2i snekOrigin;
 private:
@@ -51,5 +52,5 @@ private:
 	float dist;
 	NetworkHandler& networkHandler;
 	Vec2f prev;
-	Vec2f velocity;	
+	
 };

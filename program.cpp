@@ -158,12 +158,12 @@ void Program::eventHandler(sf::Event events)
 			{
 			case sf::Keyboard::A:
 			{
-				snek.setRotAngle(-PI / 2);
+				snek.velocity.rotateInPlaze(-PI / 2);
 				break;
 			}
 			case sf::Keyboard::D:
 			{
-				snek.setRotAngle(PI / 2);;
+				snek.velocity.rotateInPlaze(PI / 2);
 				break;
 			}
 			}
