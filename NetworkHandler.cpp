@@ -161,6 +161,7 @@ void NetworkHandler::receive()
 			{
 				std::string id;
 				packetRecieve >> id;
+				mtx.lock();
 				if (ghosts.size() == 1)
 
 				{
@@ -173,7 +174,7 @@ void NetworkHandler::receive()
 					int index = findGhost(id);
 					if (index != -1) ghosts.erase(ghosts.begin() + index);
 				}
-				
+				mtx.unlock();
 			}
 		}
 	}
