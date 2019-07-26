@@ -20,7 +20,7 @@ void Snek::update(std::vector<Ghost>& ghosts, Map& map, std::vector<Point>& food
 	velocity = normalize(velocity)*speed;
 	position += velocity;
 
-	//networkHandler.sendPos(position);
+	networkHandler.sendPos(position, velocity);
 	
 	if (spacer.getElapsedTime().asSeconds() > randSpacer)
 	{

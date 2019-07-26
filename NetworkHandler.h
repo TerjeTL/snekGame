@@ -13,7 +13,7 @@ public:
 	NetworkHandler(sf::Mutex& mtx_, std::vector<Ghost>& ghosts_, const std::vector<Point>& points_);
 	~NetworkHandler();
 	void receive();
-	void sendPos(Vec2f pos);
+	void sendPos(Vec2f pos, Vec2f vel);
 	void sendPoint(const Point& point);
 	void sendClear();
 	void sendCreate();

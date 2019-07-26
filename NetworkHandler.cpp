@@ -17,10 +17,10 @@ NetworkHandler::~NetworkHandler()
 	}
 }
 
-void NetworkHandler::sendPos(Vec2f pos)
+void NetworkHandler::sendPos(Vec2f pos, Vec2f vel)
 
 {
-	MovePacket movePacket(pos.x, pos.y, 0, 0);
+	MovePacket movePacket(pos.x, pos.y, vel.x, vel.y);
 	sf::Packet packetSend;
 	packetSend << movePacket;
 	socket.send(packetSend);
@@ -103,7 +103,7 @@ void NetworkHandler::receive()
 				packetRecieve >> id;
 				mtx.lock();
 				int index = findGhost(id);
-				if (index != -1) ghosts[index].position.x = packet.x, ghosts[index].position.y = packet.y;
+				if (index != -1) ghosts[index].position.x = packet.x, ghosts[index].position.y = packet.y, ghosts[index].velocity.x = packet.velX, ghosts[index].velocity.y = packet.velY;
 				mtx.unlock();
 			}
 

@@ -1,6 +1,6 @@
 #include "Ghost.h"
 
-Ghost::Ghost(std::string id_): id(id_)
+Ghost::Ghost(std::string id_): id(id_), velocity(0, 1)
 
 {
 
@@ -10,6 +10,12 @@ void Ghost::reset()
 
 {
 	points.clear();
+}
+
+void Ghost::update()
+
+{
+	position += velocity;
 }
 
 void Ghost::draw(sf::RenderWindow& window)

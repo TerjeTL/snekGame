@@ -82,6 +82,12 @@ void Program::update()
 	}
 	snek.update(ghosts, area, foods);
 
+	for (int i = 0; i < ghosts.size(); i++)
+
+	{
+		ghosts[i].update();
+	}
+
 	spawnFood();
 }
 
