@@ -82,12 +82,11 @@ void NetworkHandler::send()
 		if (threadPacket.getDataSize() != 0)
 
 		{
-			std::cout << "Sending packet" << std::endl;
-			//socketMtx.lock();
+			socketMtx.lock();
+			socket.setBlocking(true);
 			socket.send(threadPacket);
-			//socketMtx.unlock();
+			socketMtx.unlock();
 			threadPacket.clear();
-			std::cout << "Done sending packet" << std::endl;
 		}
 	}
 }
@@ -121,16 +120,17 @@ void NetworkHandler::receive()
 
 		unsigned char msg;
 		sf::Packet packetRecieve;
-		//socketMtx.lock();
-		int ready = (socket.receive(packetRecieve) != sf::Socket::NotReady);
-		//socketMtx.unlock();
+		socketMtx.lock();
+		socket.setBlocking(false);
+		int ready = (socket.receive(packetRecieve) == sf::Socket::Done);
+		socketMtx.unlock();
 		if (ready)
 
 		{
 			
 			packetRecieve >> msg;
 			//std::cout << msg << std::endl;
-
+			mtx.lock();
 			if (msg == MOVE)
 
 			{
@@ -141,6 +141,7 @@ void NetworkHandler::receive()
 				packetRecieve >> id;
 				int index = findGhost(id);
 				if (index != -1) ghosts[index].position.x = packet.x, ghosts[index].position.y = packet.y, ghosts[index].velocity.x = packet.velX, ghosts[index].velocity.y = packet.velY;
+				
 			}
 
 			if (msg == NPNT)
@@ -202,6 +203,7 @@ void NetworkHandler::receive()
 					if (index != -1) ghosts.erase(ghosts.begin() + index);
 				}
 			}
+			mtx.unlock();
 		}
 	}
 }
@@ -243,4 +245,7 @@ void NetworkHandler::quitConnection()
 
 {
 	quit = 1;
+	socketMtx.lock();
+	socket.disconnect();
+	socketMtx.unlock();
 }

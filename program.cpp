@@ -61,18 +61,6 @@ int Program::mainLoop()
 	return EXIT_SUCCESS;
 }
 
-void Program::updateThread()
-
-{
-	sf::Clock clockUpdate;
-	networkHandler.sendCreate();
-	while (!quit)
-
-	{
-		
-	}
-}
-
 void Program::spawnFood()
 
 {
