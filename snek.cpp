@@ -1,7 +1,7 @@
 #include "snek.h"
 
 Snek::Snek(Map& map, NetworkHandler& networkHandler_, sf::Mutex& mtx_, QuadTree*& qtree_) : bodySize(3), body(3, 70), rotAngle(0.0), dist(0), snekOrigin(map.origin), position(100, 100), velocity(1, 0),
-networkHandler(networkHandler_), mtx(mtx_), squareSnek(false), qtree(qtree_), wooshSnek(false)
+networkHandler(networkHandler_), mtx(mtx_), squareSnek(false), qtree(qtree_), wooshSnek(false), revSnek(false), mitosis(false)
 {
 	resetPos(map);
 	snekRekt, allowedToMakePoint = false, true;
@@ -15,10 +15,7 @@ networkHandler(networkHandler_), mtx(mtx_), squareSnek(false), qtree(qtree_), wo
 
 void Snek::update(std::vector<Ghost>& ghosts, Map& map, std::vector<Point>& foods)
 {
-	body.setRadius(bodySize);
-	velocity.rotateInPlaze(rotAngle);
-	velocity = normalize(velocity)*speed;
-	position += velocity;
+	posUpdate();
 
 	snekBodyUpdate(); //who tf knows how any of this works. see especially below
 
@@ -39,6 +36,17 @@ void Snek::update(std::vector<Ghost>& ghosts, Map& map, std::vector<Point>& food
 	if (snekRekt) {
 		std::cout << "snek ded" << std::endl;
 	}
+}
+
+void Snek::posUpdate()
+{
+	if (revSnekTimer.getElapsedTime().asSeconds() > 10) revSnek = false;
+	if (revSnek) rotAngle = (-rotAngle);
+
+	body.setRadius(bodySize);
+	velocity.rotateInPlaze(rotAngle);
+	velocity = normalize(velocity)*speed;
+	position += velocity;
 }
 
 void Snek::snekBodyUpdate()
@@ -104,6 +112,15 @@ void Snek::checkFood(Point point, Map& map, std::vector<Point>& foods)
 		case WOOSH:
 			wooshSnek = true;
 			wooshTimer.restart();
+			break;
+		case REVSNEK:
+			revSnek = true;
+			revSnekTimer.restart();
+			break;
+		case MITOSIS:
+			mitosis = true;
+			mitosisClock.restart();
+			break;
 	}
 	foods.erase(foods.begin() + point.id);
 

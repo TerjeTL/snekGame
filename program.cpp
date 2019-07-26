@@ -2,7 +2,8 @@
 
 
 Program::Program(int width, int height) : w(width), h(height), area(width, height, height - 100, 5),
-activatorSize(6), running(true), snek(area, networkHandler, mtx, qtree), networkHandler(mtx, ghosts, snek.points), window(sf::VideoMode(width, height), "Sneky boi")
+activatorSize(6), running(true), snek(area, networkHandler, mtx, qtree), networkHandler(mtx, ghosts, snek.points), window(sf::VideoMode(width, height), "Sneky boi"),
+spawnTimer(8)
 {
 	snek.body.setFillColor(sf::Color::Green);
 	//ghosts.push_back(Ghost());
@@ -73,16 +74,19 @@ int Program::mainLoop()
 	return EXIT_SUCCESS;
 }
 
-void Program::spawnFood()
+void Program::spawnFood(Snek snek) // i have no idea if this mitosis stuff will work with networking
 
 {
+	int spawnTimerCopy = spawnTimer;
+	if (snek.mitosisClock.getElapsedTime().asSeconds() < 4 && snek.mitosis) spawnTimerCopy = 0.4;
+	else snek.mitosis = false;
 
-	if (spawnClock.getElapsedTime().asSeconds() > 3)
+	if (spawnClock.getElapsedTime().asSeconds() > spawnTimerCopy)
 	{
 		Vec2f position;
 		position.x = randomInt(area.origin.x, area.origin.x + area.size);
 		position.y = randomInt(area.origin.y, area.origin.y + area.size);
-		int type = randomInt(1, 7);
+		int type = randomInt(1, 9);
 		int id = foods.size();
 		foods.push_back(Point(position, type, activatorSize, id));
 		spawnClock.restart();
@@ -132,7 +136,7 @@ void Program::update()
 		ghosts[i].update();
 	}
 	
-	spawnFood();
+	spawnFood(snek);
 }
 
 void Program::draw()
@@ -180,7 +184,7 @@ void Program::reset()
 	}
 }
 
-void Program::eventHandler(sf::Event events)
+void Program::eventHandler(sf::Event events) // This needs a rework. Especially the revsnek solution is messy. should be simple to make it at least 100% better. later....
 {
 	float rot = (float)0.0;
 
@@ -199,12 +203,14 @@ void Program::eventHandler(sf::Event events)
 			{
 			case sf::Keyboard::A:
 			{
-				snek.velocity.rotateInPlaze(-PI / 2);
+				if (snek.revSnek) snek.velocity.rotateInPlaze(PI / 2);
+				else snek.velocity.rotateInPlaze(-PI / 2);
 				break;
 			}
 			case sf::Keyboard::D:
 			{
-				snek.velocity.rotateInPlaze(PI / 2);
+				if (snek.revSnek) snek.velocity.rotateInPlaze(-PI / 2);
+				else snek.velocity.rotateInPlaze(PI / 2);
 				break;
 			}
 			}

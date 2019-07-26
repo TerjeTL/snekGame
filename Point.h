@@ -9,6 +9,8 @@
 #define BORDER 5
 #define SQUARE 6
 #define WOOSH 7
+#define REVSNEK 8
+#define MITOSIS 9
 
 struct Point
 

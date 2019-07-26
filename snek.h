@@ -15,6 +15,7 @@ public:
 	Snek(Map& map, NetworkHandler& networkHandler_, sf::Mutex& mtx_, QuadTree*& qtree_);
 
 	void update(std::vector<Ghost>& ghosts, Map& map, std::vector<Point>& foods);
+	void posUpdate();
 	void snekBodyUpdate();
 	void checkFood(Point point, Map& map, std::vector<Point>& foods);
 	void draw(sf::RenderWindow& window);
@@ -27,7 +28,7 @@ public:
 
 	int speedSnek(int ch);
 	int fatSnek(int ch);
-	bool squareSnek, wooshSnek;
+	bool squareSnek, wooshSnek, revSnek, mitosis;
 	int randomInt(int min, int max);
 
 	int bodySize;
@@ -37,7 +38,7 @@ public:
 
 	std::vector<Point> points;
 	sf::CircleShape body;
-	sf::Clock squareSnekTimer, wooshTimer;
+	sf::Clock squareSnekTimer, wooshTimer, revSnekTimer, mitosisClock;
 	
 	Vec2f velocity;	
 	Vec2f position;
