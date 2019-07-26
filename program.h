@@ -32,6 +32,7 @@ private:
 	sf::Clock spawnClock;
 	std::vector<Point> foods;
 	sf::Mutex mtx;
+	
 	NetworkHandler networkHandler;
 };
 

@@ -165,6 +165,16 @@ void Program::server()
 			}
 			
 		}
+
+		if (alive.getElapsedTime().asSeconds() > 1.0)
+
+		{
+			AlivePacket packet;
+			sf::Packet sendPacket;
+			sendPacket << packet;
+			broadcast(sendPacket);
+			alive.restart();
+		}
 	}
 }
 

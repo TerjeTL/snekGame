@@ -18,7 +18,7 @@ public:
 	void server();
 	void client();
 	void getInput();
-	void broadcast(sf::Packet& packet, int index);
+	void broadcast(sf::Packet& packet, int index = -1);
 
 	void generateID(std::string& id);
 	int checkID(std::string &id);
@@ -32,5 +32,6 @@ private:
 	sf::Mutex mtx;
 	int quit = 0;
 	std::string msgSend;
+	sf::Clock alive;
 	std::vector<Socket*> sockets;
 };

@@ -53,3 +53,9 @@ sf::Packet& operator <<(sf::Packet& packet, const DisconnectPacket& disconnect)
 {
 	return packet << disconnect.name;
 }
+
+sf::Packet& operator <<(sf::Packet& packet, const AlivePacket& alive)
+
+{
+	return packet << alive.name;
+}

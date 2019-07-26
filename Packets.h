@@ -6,6 +6,7 @@
 #define MCLR 3
 #define MYID 4
 #define DSCT 5
+#define ALIV 6
 
 struct MovePacket
 
@@ -96,6 +97,18 @@ struct DisconnectPacket
 	unsigned char name = DSCT;
 };
 
+struct AlivePacket
+
+{
+	AlivePacket()
+
+	{
+
+	}
+
+	unsigned char name = ALIV;
+};
+
 sf::Packet& operator <<(sf::Packet& packet, const MovePacket& move);
 sf::Packet& operator >>(sf::Packet& packet, MovePacket& move);
 sf::Packet& operator <<(sf::Packet& packet, const PointPacket& point);
@@ -105,3 +118,4 @@ sf::Packet& operator >>(sf::Packet& packet, CreateGhostPacket& create);
 sf::Packet& operator <<(sf::Packet& packet, const ClearPacket& clear);
 sf::Packet& operator <<(sf::Packet& packet, const myIDPacket& idpacket);
 sf::Packet& operator <<(sf::Packet& packet, const DisconnectPacket& disconnect);
+sf::Packet& operator <<(sf::Packet& packet, const AlivePacket& alive);

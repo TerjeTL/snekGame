@@ -35,5 +35,7 @@ private:
 	sf::Mutex socketMtx;
 	std::vector<Ghost>& ghosts;
 	const std::vector<Point>& points;
+	sf::Clock clock;
+	int connected = 0;
 	int quit = 0;
 };

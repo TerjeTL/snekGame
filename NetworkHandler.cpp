@@ -122,9 +122,9 @@ void NetworkHandler::receive()
 		sf::Packet packetRecieve;
 		socketMtx.lock();
 		socket.setBlocking(false);
-		int ready = (socket.receive(packetRecieve) == sf::Socket::Done);
+		//int ready = (socket.receive(packetRecieve) == sf::Socket::Done);
 		socketMtx.unlock();
-		if (ready)
+		while (socket.receive(packetRecieve) == sf::Socket::Done)
 
 		{
 			
@@ -203,7 +203,22 @@ void NetworkHandler::receive()
 					if (index != -1) ghosts.erase(ghosts.begin() + index);
 				}
 			}
+
+			if (msg == ALIV)
+
+			{
+				clock.restart();
+			}
+
 			mtx.unlock();
+		}
+
+		if (clock.getElapsedTime().asSeconds() > 10 && connected)
+
+		{
+			std::cout << "Lost connection to server" << std::endl;
+			connected = 0;
+			socket.disconnect();
 		}
 	}
 }
@@ -228,11 +243,13 @@ int NetworkHandler::findGhost(const std::string& id)
 void NetworkHandler::connect(std::string ip, int port)
 
 {
-	if (socket.connect(ip, port))
+	if (socket.connect(ip, port, sf::seconds(5)))
 
 	{
 		std::cout << "Connected to " << ip << ":" << port << std::endl;
 	}
+	connected = 1;
+	clock.restart();
 
 	recieveThread = new sf::Thread(&NetworkHandler::receive, this);
 	recieveThread->launch();
