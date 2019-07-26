@@ -141,37 +141,38 @@ void Program::reset()
 
 void Program::eventHandler(sf::Event events)
 {
-
-	float rot = (float)0.0;
-
-	if (!snek.squareSnek || snek.squareSnekTimer.getElapsedTime().asSeconds() > 10)
-	{	
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) rot--;
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) rot++;
-		snek.setRotAngle(rot);
-		snek.squareSnek = false;
-	}
-	else
+	if (snek.updateDone == 1);
 	{
-		if (events.type == sf::Event::KeyPressed)
-		{
-			switch (events.key.code)
-			{
-			case sf::Keyboard::A:
-			{
-				snek.setRotAngle(-PI / 2);
-				break;
-			}
-			case sf::Keyboard::D:
-			{
-				snek.setRotAngle(PI / 2);;
-				break;
-			}
-			}
-		}
-		snek.setRotAngle(rot);
-	}
+		float rot = (float)0.0;
 
+		if (!snek.squareSnek || snek.squareSnekTimer.getElapsedTime().asSeconds() > 10)
+		{
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) rot--;
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) rot++;
+			snek.setRotAngle(rot);
+			snek.squareSnek = false;
+		}
+		else
+		{
+			if (events.type == sf::Event::KeyPressed)
+			{
+				switch (events.key.code)
+				{
+				case sf::Keyboard::A:
+				{
+					snek.setRotAngle(-PI / 2);
+					break;
+				}
+				case sf::Keyboard::D:
+				{
+					snek.setRotAngle(PI / 2);;
+					break;
+				}
+				}
+			}
+			snek.setRotAngle(rot);
+		}
+	}
 
 	if (events.type == sf::Event::EventType::KeyPressed)
 

@@ -15,9 +15,7 @@ networkHandler(networkHandler_), mtx(mtx_), squareSnek(false)
 
 void Snek::update(std::vector<Ghost>& ghosts, Map& map, std::vector<Point>& foods)
 {
-	std::cout << rotAngle << std::endl;
 	body.setRadius(bodySize);
-	std::cout << rotAngle << std::endl;
 	velocity.rotateInPlaze(rotAngle);
 	velocity = normalize(velocity)*speed;
 	position += velocity;
