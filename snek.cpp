@@ -15,7 +15,9 @@ networkHandler(networkHandler_), mtx(mtx_), squareSnek(false)
 
 void Snek::update(std::vector<Ghost>& ghosts, Map& map, std::vector<Point>& foods)
 {
+	std::cout << rotAngle << std::endl;
 	body.setRadius(bodySize);
+	std::cout << rotAngle << std::endl;
 	velocity.rotateInPlaze(rotAngle);
 	velocity = normalize(velocity)*speed;
 	position += velocity;
@@ -27,8 +29,8 @@ void Snek::update(std::vector<Ghost>& ghosts, Map& map, std::vector<Point>& food
 		dist = 0;
 		spacer.restart();
 		randSpacer = randNumber(1.6, 0.6);
-		//std::cout << randSpacer << std::endl;
-		randDist = randomInt(25, 7);
+		randDist = randomInt(3*bodySize + 9, 3 * bodySize + 25);
+		//std::cout << randDist << std::endl;
 
 	}
 	if (dist < randDist)
@@ -146,7 +148,10 @@ void Snek::resetPos(const Map& map)
 
 void Snek::setRotAngle(float rad)
 {
-	if (squareSnek) rotAngle = rad;
+	if (squareSnek)
+	{
+		rotAngle = rad;
+	}
 	else 
 	{
 		rotAngle = rad * rotSpeed;

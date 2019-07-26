@@ -82,7 +82,7 @@ void Program::spawnFood()
 		Vec2f position;
 		position.x = randomInt(area.origin.x, area.origin.x + area.size);
 		position.y = randomInt(area.origin.y, area.origin.y + area.size);
-		int type = randomInt(1, 5);
+		int type = randomInt(1, 6);
 
 		foods.push_back(Point(position, type, activatorSize));
 		spawnClock.restart();
@@ -155,17 +155,33 @@ void Program::eventHandler(sf::Event events)
 {
 
 	float rot = (float)0.0;
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) rot--;
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) rot++;
 
 	if (!snek.squareSnek || snek.squareSnekTimer.getElapsedTime().asSeconds() > 10)
 	{	
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) rot--;
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) rot++;
 		snek.setRotAngle(rot);
 		snek.squareSnek = false;
 	}
 	else
 	{
-		snek.setRotAngle(PI/2 *rot);
+		if (events.type == sf::Event::KeyPressed)
+		{
+			switch (events.key.code)
+			{
+			case sf::Keyboard::A:
+			{
+				snek.setRotAngle(-PI / 2);
+				break;
+			}
+			case sf::Keyboard::D:
+			{
+				snek.setRotAngle(PI / 2);;
+				break;
+			}
+			}
+		}
+		snek.setRotAngle(rot);
 	}
 
 
