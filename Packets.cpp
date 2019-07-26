@@ -47,3 +47,9 @@ sf::Packet& operator <<(sf::Packet& packet, const myIDPacket& idpacket)
 {
 	return packet << idpacket.name;
 }
+
+sf::Packet& operator <<(sf::Packet& packet, const DisconnectPacket& disconnect)
+
+{
+	return packet << disconnect.name;
+}

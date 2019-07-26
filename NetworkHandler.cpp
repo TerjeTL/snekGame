@@ -155,6 +155,26 @@ void NetworkHandler::receive()
 				std::cout << "My ID " << id << std::endl;
 				mtx.unlock();
 			}
+
+			if (msg == "dsct")
+
+			{
+				std::string id;
+				packetRecieve >> id;
+				if (ghosts.size() == 1)
+
+				{
+					ghosts.clear();
+				}
+
+				else
+
+				{
+					int index = findGhost(id);
+					if (index != -1) ghosts.erase(ghosts.begin() + index);
+				}
+				
+			}
 		}
 	}
 }

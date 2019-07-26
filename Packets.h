@@ -78,16 +78,16 @@ struct myIDPacket
 	char name[5] = "myid";
 };
 
-struct UpdateSnakePacket
+struct DisconnectPacket
 
 {
-	UpdateSnakePacket()
+	DisconnectPacket()
 
 	{
 
 	}
 
-	char name[5] = "";
+	char name[5] = "dsct";
 };
 
 sf::Packet& operator <<(sf::Packet& packet, const MovePacket& move);
@@ -98,3 +98,4 @@ sf::Packet& operator <<(sf::Packet& packet, const CreateGhostPacket& create);
 sf::Packet& operator >>(sf::Packet& packet, CreateGhostPacket& create);
 sf::Packet& operator <<(sf::Packet& packet, const ClearPacket& clear);
 sf::Packet& operator <<(sf::Packet& packet, const myIDPacket& idpacket);
+sf::Packet& operator <<(sf::Packet& packet, const DisconnectPacket& disconnect);

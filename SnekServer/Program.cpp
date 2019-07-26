@@ -121,6 +121,12 @@ void Program::server()
 						if (sockets[i]->socket->receive(recievePacket) == sf::Socket::Disconnected)
 
 						{
+							DisconnectPacket packet;
+							sf::Packet sendPacket;
+							sendPacket << packet;
+							sendPacket << sockets[i]->id;
+							broadcast(sendPacket, i);
+
 							std::cout << sockets[i]->id << " disconnected!" << std::endl;
 							selector.remove(*sockets[i]->socket);
 							delete sockets[i];
