@@ -137,7 +137,16 @@ void Program::eventHandler(sf::Event events)
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) rot--;
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) rot++;
 
-	snek.setRotAngle(rot);
+	if (!snek.squareSnek || snek.squareSnekTimer.getElapsedTime().asSeconds() > 10)
+	{	
+		snek.setRotAngle(rot);
+		snek.squareSnek = false;
+	}
+	else
+	{
+		snek.setRotAngle(PI/2 *rot);
+	}
+
 
 	if (events.type == sf::Event::EventType::KeyPressed)
 

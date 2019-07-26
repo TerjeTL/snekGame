@@ -1,6 +1,6 @@
 #include "snek.h"
 
-Snek::Snek(Map& map, NetworkHandler& networkHandler_) : bodySize(3), body(3, 70), rotAngle(0.0), dist(0), snekOrigin(map.origin), position(100, 100), velocity(1, 0),
+Snek::Snek(Map& map, NetworkHandler& networkHandler_) : bodySize(3), body(3, 70), rotAngle(0.0), dist(0), snekOrigin(map.origin), position(100, 100), velocity(1, 0), squareSnek(false),
 networkHandler(networkHandler_)
 {
 	resetPos(map);
@@ -92,6 +92,9 @@ void Snek::checkFood(std::vector<Point>& foods, Map& map)
 				case BORDER: //flashy travely boarders
 					map.papersPleaseDisabled(1);
 					break;
+				case SQUARE: //snek is playing snakes
+					squareSnek = true;
+					squareSnekTimer.restart();
 				}
 				foods.erase(foods.begin() + k);
 			}
@@ -143,7 +146,12 @@ void Snek::resetPos(const Map& map)
 
 void Snek::setRotAngle(float rad)
 {
-	rotAngle = rad*rotSpeed;
+	if (squareSnek) rotAngle = rad;
+	else 
+	{
+		rotAngle = rad * rotSpeed;
+	}
+	
 }
 
 void Snek::setRotSpeed(float speed)
