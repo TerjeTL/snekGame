@@ -42,7 +42,7 @@ public:
 private:
 	
 	sf::Mutex& mtx;
-	sf::Clock spacer, speedSnekClock, fatSnekClock;
+	sf::Clock spacer, speedSnekClock, fatSnekClock, updateClock;
 	
 	int randDist;
 	bool allowedToMakePoint;
