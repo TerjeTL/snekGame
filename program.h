@@ -29,7 +29,7 @@ private:
 	int w, h;
 	int quit = 0;
 	int activatorSize;
-	std::vector<std::vector<int>> colors = { {0, 255, 0},  {255, 0, 0}, {255, 0, 255}, {0, 255, 255}, {255, 160, 60}, {55, 255, 200} };
+	std::vector<std::vector<int>> colors = { {0, 255, 0},  {255, 0, 0}, {255, 0, 255}, {0, 255, 255}, {255, 160, 60}, {130, 60, 200}, {255, 255, 0} };
 	sf::RenderWindow window;
 	sf::Clock spawnClock;
 	std::vector<Point> foods;

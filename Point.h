@@ -8,6 +8,7 @@
 #define THIN 4
 #define BORDER 5
 #define SQUARE 6
+#define WOOSH 7
 
 struct Point
 

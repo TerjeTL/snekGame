@@ -82,7 +82,7 @@ void Program::spawnFood()
 		Vec2f position;
 		position.x = randomInt(area.origin.x, area.origin.x + area.size);
 		position.y = randomInt(area.origin.y, area.origin.y + area.size);
-		int type = randomInt(1, 6);
+		int type = randomInt(1, 7);
 		int id = foods.size();
 		foods.push_back(Point(position, type, activatorSize, id));
 		spawnClock.restart();

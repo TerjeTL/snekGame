@@ -1,7 +1,7 @@
 #include "snek.h"
 
 Snek::Snek(Map& map, NetworkHandler& networkHandler_, sf::Mutex& mtx_, QuadTree*& qtree_) : bodySize(3), body(3, 70), rotAngle(0.0), dist(0), snekOrigin(map.origin), position(100, 100), velocity(1, 0),
-networkHandler(networkHandler_), mtx(mtx_), squareSnek(false), qtree(qtree_)
+networkHandler(networkHandler_), mtx(mtx_), squareSnek(false), qtree(qtree_), wooshSnek(false)
 {
 	resetPos(map);
 	snekRekt, allowedToMakePoint = false, true;
@@ -20,32 +20,7 @@ void Snek::update(std::vector<Ghost>& ghosts, Map& map, std::vector<Point>& food
 	velocity = normalize(velocity)*speed;
 	position += velocity;
 
-	
-	
-	
-	if (spacer.getElapsedTime().asSeconds() > randSpacer)
-	{
-		dist = 0;
-		spacer.restart();
-		randSpacer = randNumber(1.6, 0.6);
-		randDist = randomInt(3*bodySize + 9, 3 * bodySize + 25);
-		//std::cout << randDist << std::endl;
-
-	}
-	if (dist < randDist)
-	{
-		spacer.restart();
-		pointsAllowed = 0;
-	}
-	else
-	{
-		points.push_back(Point(position, SNAKE, bodySize));
-		pointsAllowed = 1;
-		//networkHandler.sendPoint(Point(position, SNAKE, bodySize));
-	}
-	dist += distance(prev, position);
-	//std::cout << snek.dist << std::endl;
-	prev = position;
+	snekBodyUpdate(); //who tf knows how any of this works. see especially below
 
 	networkHandler.sendPos(position, velocity, pointsAllowed, bodySize);
 
@@ -64,6 +39,36 @@ void Snek::update(std::vector<Ghost>& ghosts, Map& map, std::vector<Point>& food
 	if (snekRekt) {
 		std::cout << "snek ded" << std::endl;
 	}
+}
+
+void Snek::snekBodyUpdate()
+{
+	if (wooshTimer.getElapsedTime().asSeconds() > 10) wooshSnek = false;
+
+	if (spacer.getElapsedTime().asSeconds() > randSpacer) //All that random numbers jazz
+	{
+		dist = 0;
+		spacer.restart();
+		randSpacer = randNumber(1.6, 0.6);
+		randDist = randomInt(3 * bodySize + 9, 3 * bodySize + 25);
+		//std::cout << randDist << std::endl;
+
+	}
+
+	if (dist < randDist || wooshSnek) // if/else -> points push-back.
+	{
+		spacer.restart();
+		pointsAllowed = 0;
+	}
+	else
+	{
+		points.push_back(Point(position, SNAKE, bodySize));
+		pointsAllowed = 1;
+		//networkHandler.sendPoint(Point(position, SNAKE, bodySize));
+	}
+	dist += distance(prev, position);
+	//std::cout << snek.dist << std::endl;
+	prev = position;
 }
 
 void Snek::checkFood(Point point, Map& map, std::vector<Point>& foods)
@@ -95,6 +100,10 @@ void Snek::checkFood(Point point, Map& map, std::vector<Point>& foods)
 		case SQUARE: //snek is playing snakes
 			squareSnek = true;
 			squareSnekTimer.restart();
+			break;
+		case WOOSH:
+			wooshSnek = true;
+			wooshTimer.restart();
 	}
 	foods.erase(foods.begin() + point.id);
 
@@ -134,9 +143,10 @@ void Snek::draw(sf::RenderWindow& window)
 		body.setPosition(points[i].position.x, points[i].position.y);
 		window.draw(body);
 	}
-	body.setPosition({ position.x, position.y });
-	window.draw(body);
-	
+	sf::CircleShape temp = body;
+	temp.setPosition({ position.x, position.y }); // shitty code but works :))
+	temp.setFillColor(sf::Color::White);
+	window.draw(temp);
 }
 
 void Snek::resetPos(const Map& map)
@@ -147,7 +157,7 @@ void Snek::resetPos(const Map& map)
 	velocity.rotateInPlaze(PI*angle / 180.0);
 }
 
-void Snek::setRotAngle(float rad)
+void Snek::setRotAngle(float rad) // what is this shit
 {
 	if (squareSnek)
 	{
@@ -160,7 +170,7 @@ void Snek::setRotAngle(float rad)
 	
 }
 
-void Snek::setRotSpeed(float speed)
+void Snek::setRotSpeed(float speed) // and this..
 {
 	rotSpeed = speed;
 }
