@@ -4,6 +4,7 @@
 #include <iostream>
 #include <SFML/Network.hpp>
 #include "Socket.h"
+#include "../Packets.h"
 
 class Program
 
@@ -25,7 +26,8 @@ public:
 private:
 	sf::TcpSocket clientSocket;
 	sf::Thread* thread = 0;
-	
+	sf::SocketSelector selector;
+	sf::TcpListener listener;
 	
 	sf::Mutex mtx;
 	int quit = 0;

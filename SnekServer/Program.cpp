@@ -24,7 +24,7 @@ int Program::mainLoop()
 	
 
 	char who;
-	std::cout << "Server (s) or client (c)?";
+	std::cout << "Server (s) or client (c)? ";
 	std::cin >> who;
 
 	if (who == 's')
@@ -45,8 +45,7 @@ int Program::mainLoop()
 void Program::server()
 
 {
-	sf::SocketSelector selector;
-	sf::TcpListener listener;
+	
 	listener.listen(5000);
 	selector.add(listener);
 	
@@ -59,7 +58,6 @@ void Program::server()
 			if (selector.isReady(listener))
 
 			{
-				mtx.lock();
 				sf::TcpSocket* newClient = new sf::TcpSocket;
 				Socket* socket = new Socket(newClient);
 				if (listener.accept(*newClient) == sf::Socket::Done)
@@ -85,6 +83,12 @@ void Program::server()
 					//std::cout << "1" << std::endl;
 					std::cout << "New client connected: " << sockets[sockets.size() - 1]->socket->getRemoteAddress() << " with id " << sockets[sockets.size() - 1]->id << std::endl;
 					std::cout << sockets.size() << " clients connected!" << std::endl;
+
+					myIDPacket idPacket;
+					sf::Packet sendPacket;
+					sendPacket << idPacket;
+					sendPacket << sockets[sockets.size() - 1]->id;
+					sockets[sockets.size() - 1]->socket->send(sendPacket);
 				}
 
 				else
@@ -92,13 +96,11 @@ void Program::server()
 				{
 					delete socket;
 				}
-				mtx.unlock();
 			}
 
 			else
 
 			{
-				int index = -1;
 				for (int i = 0; i < sockets.size(); i++)
 
 				{
@@ -116,7 +118,6 @@ void Program::server()
 
 					{
 						sf::Packet recievePacket;
-						mtx.lock();
 						if (sockets[i]->socket->receive(recievePacket) == sf::Socket::Disconnected)
 
 						{
@@ -128,15 +129,26 @@ void Program::server()
 							i--;
 							
 						}
-						mtx.unlock();
-						broadcast(recievePacket, i);
+
+						else
+
+						{
+							std::string id = sockets[i]->id;
+							recievePacket << id;
+							sf::Packet copy = recievePacket;
+							std::string msg;
+							copy >> msg;
+
+							if (msg == "mclr")
+
+							{
+								std::cout << id << " has reset!" << std::endl;
+							}
+
+							broadcast(recievePacket, i);
+						}
+						
 					}
-				}
-
-				if (index != -1)
-
-				{
-					sockets.erase(sockets.begin() + index);
 				}
 			}
 			
@@ -178,13 +190,11 @@ void Program::generateID(std::string& id)
 void Program::broadcast(sf::Packet& packet, int index)
 
 {
-	mtx.lock();
 	for (int i = 0; i < sockets.size(); i++)
 
 	{
 		if (index != i) sockets[i]->socket->send(packet);
 	}
-	mtx.unlock();
 }
 
 void Program::client()

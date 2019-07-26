@@ -1,6 +1,6 @@
 #include "Ghost.h"
 
-Ghost::Ghost()
+Ghost::Ghost(std::string id_): id(id_)
 
 {
 

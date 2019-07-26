@@ -2,10 +2,10 @@
 
 
 Program::Program(int width, int height) : w(width), h(height), area(width, height, height - 100, 5),
-activatorSize(6), running(true), snek(area, networkHandler), networkHandler(mtx, ghosts), window(sf::VideoMode(width, height), "Sneky boi")
+activatorSize(6), running(true), snek(area, networkHandler), networkHandler(mtx, ghosts, snek.points), window(sf::VideoMode(width, height), "Sneky boi")
 {
 	snek.body.setFillColor(sf::Color::Green);
-	ghosts.push_back(Ghost());
+	//ghosts.push_back(Ghost());
 	/*snakes.push_back(Snek(area));
 	snakes[1].body.setFillColor(sf::Color::Red);*/
 
@@ -17,8 +17,8 @@ int Program::mainLoop()
 	sf::Event events;
 	sf::Clock clockUpdate;
 	//NetworkHandler 
-	networkHandler.connect("127.0.0.1", 5000);
-
+	networkHandler.connect("82.47.120.89", 5000);
+	networkHandler.sendCreate();
 	if (!window.isOpen())
 	{
 		return EXIT_FAILURE;
@@ -52,6 +52,7 @@ int Program::mainLoop()
 		window.display();
 	}
 	networkHandler.quitConnection();
+	std::cout << "Shutting down" << std::endl;
 	return EXIT_SUCCESS;
 }
 
@@ -119,6 +120,7 @@ void Program::reset()
 		snek.snekRekt = false;
 		running = true;
 		foods.clear();
+		networkHandler.sendClear();
 	}
 }
 

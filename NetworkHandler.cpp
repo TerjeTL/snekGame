@@ -1,6 +1,6 @@
 #include "NetworkHandler.h"
 
-NetworkHandler::NetworkHandler(sf::Mutex& mtx_, std::vector<Ghost>& ghosts_): mtx(mtx_), ghosts(ghosts_)
+NetworkHandler::NetworkHandler(sf::Mutex& mtx_, std::vector<Ghost>& ghosts_, const std::vector<Point>& points_): mtx(mtx_), ghosts(ghosts_), points(points_)
 
 {
 
@@ -35,16 +35,58 @@ void NetworkHandler::sendPoint(const Point& point)
 	socket.send(packetSend);
 }
 
+void NetworkHandler::sendClear()
+
+{
+	ClearPacket clearPacket;
+	sf::Packet packetSend;
+	packetSend << clearPacket;
+	socket.send(packetSend);
+}
+
+void NetworkHandler::sendCreate()
+
+{
+	CreateGhostPacket createGhostPacket;
+	sf::Packet packetSend;
+	packetSend << createGhostPacket;
+	socket.send(packetSend);
+}
+
+void NetworkHandler::sendUpdateSnakes(std::string id)
+
+{
+	sf::Packet packetSend;
+	CreateGhostPacket createGhostPacket;
+	createGhostPacket.first = 0;
+	packetSend << createGhostPacket;
+	socket.send(packetSend);
+
+	for (int i = 0; i < points.size(); i++)
+
+	{
+		packetSend.clear();
+		PointPacket pointPacket(points[i].position.x, points[i].position.y, points[i].type, points[i].radius);
+		pointPacket.id = id;
+		packetSend << pointPacket;
+		socket.send(packetSend);
+	}
+}
+
 void NetworkHandler::receive()
 
 {
+	socket.setBlocking(false);
 	while (!quit)
 
 	{
+
 		std::string msg;
 		sf::Packet packetRecieve;
 		mtx.lock();
-		if (socket.receive(packetRecieve) != sf::Socket::NotReady)
+		int ready = (socket.receive(packetRecieve) != sf::Socket::NotReady);
+		mtx.unlock();
+		if (ready)
 
 		{
 			
@@ -57,8 +99,12 @@ void NetworkHandler::receive()
 				
 				MovePacket packet;
 				packetRecieve >> packet;
-				ghosts[0].position.x = packet.x;
-				ghosts[0].position.y = packet.y;
+				std::string id;
+				packetRecieve >> id;
+				mtx.lock();
+				int index = findGhost(id);
+				if (index != -1) ghosts[index].position.x = packet.x, ghosts[index].position.y = packet.y;
+				mtx.unlock();
 			}
 
 			if (msg == "npnt")
@@ -66,11 +112,68 @@ void NetworkHandler::receive()
 			{
 				PointPacket packet;
 				packetRecieve >> packet;
-				ghosts[0].points.push_back(Point(Vec2f(packet.x, packet.y), packet.type, packet.radius));
+				std::string id;
+				packetRecieve >> id;
+				mtx.lock();
+				int index = findGhost(id);
+				if (index != -1 && (packet.id == myID || packet.id == "")) ghosts[index].points.push_back(Point(Vec2f(packet.x, packet.y), packet.type, packet.radius));
+				mtx.unlock();
+			}
+
+			if (msg == "crea")
+
+			{
+				std::string id;
+				CreateGhostPacket packet;
+				packetRecieve >> packet;
+				packetRecieve >> id;
+				std::cout << "Created ghost with " << id << std::endl;
+				mtx.lock();
+				ghosts.push_back(Ghost(id));
+				if (packet.first) sendUpdateSnakes(id);
+				mtx.unlock();
+			}
+
+			if (msg == "mclr")
+
+			{
+				std::string id;
+				packetRecieve >> id;
+				mtx.lock();
+				int index = findGhost(id);
+				if (index != -1) ghosts[index].reset();
+				mtx.unlock();
+			}
+
+			if (msg == "myid")
+
+			{
+				std::string id;
+				packetRecieve >> id;
+				mtx.lock();
+				myID = id;
+				std::cout << "My ID " << id << std::endl;
+				mtx.unlock();
 			}
 		}
-		mtx.unlock();
 	}
+}
+
+int NetworkHandler::findGhost(const std::string& id)
+
+{
+	for (int i = 0; i < ghosts.size(); i++)
+
+	{
+		if (ghosts[i].id == id)
+
+		{
+			return i;
+			break;
+		}
+	}
+
+	return -1;
 }
 
 void NetworkHandler::connect(std::string ip, int port)

@@ -10,20 +10,24 @@ class NetworkHandler
 
 {
 public:
-	NetworkHandler(sf::Mutex& mtx_, std::vector<Ghost>& ghosts_);
+	NetworkHandler(sf::Mutex& mtx_, std::vector<Ghost>& ghosts_, const std::vector<Point>& points_);
 	~NetworkHandler();
 	void receive();
 	void sendPos(Vec2f pos);
 	void sendPoint(const Point& point);
+	void sendClear();
+	void sendCreate();
+	void sendUpdateSnakes(std::string id);
 	void connect(std::string ip, int port);
 	void quitConnection();
-	
+	int findGhost(const std::string& id);
 
 private:
 	sf::TcpSocket socket;
-	std::string id;
+	std::string myID;
 	sf::Thread* recieveThread = 0;
 	sf::Mutex& mtx;
 	std::vector<Ghost>& ghosts;
+	const std::vector<Point>& points;
 	int quit = 0;
 };

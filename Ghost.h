@@ -8,7 +8,7 @@ class Ghost
 
 {
 public:
-	Ghost();
+	Ghost(std::string id_);
 	Vec2f position;
 	std::vector<Point> points;
 	std::string id;
@@ -18,5 +18,4 @@ public:
 	void draw(sf::RenderWindow& window);
 
 private:
-
 };
