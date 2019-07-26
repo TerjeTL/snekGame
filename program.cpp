@@ -92,7 +92,7 @@ void Program::update()
 	{
 		ghosts[i].update();
 	}
-
+	networkHandler.sendAlive();
 	spawnFood();
 }
 

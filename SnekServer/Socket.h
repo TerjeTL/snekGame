@@ -23,4 +23,6 @@ struct Socket
 
 	std::string id;
 	sf::TcpSocket* socket;
+	//sf::IpAddress ip;
+	//unsigned short port;
 };

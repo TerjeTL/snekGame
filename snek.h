@@ -43,8 +43,8 @@ public:
 private:
 	
 	sf::Mutex& mtx;
-	sf::Clock spacer, speedSnekClock, fatSnekClock, updateClock;
-	
+	sf::Clock spacer, speedSnekClock, fatSnekClock, updateClock, sendPosClock, sendPointClock;
+
 	int randDist;
 	bool allowedToMakePoint;
 	float rotAngle;

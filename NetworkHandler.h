@@ -18,24 +18,33 @@ public:
 	void sendPoint(const Point& point, const std::string& id = "");
 	void sendClear();
 	void sendCreate();
+	void sendAlive();
 	void sendUpdateSnakes(std::string id);
 	void connect(std::string ip, int port);
 	void quitConnection();
 	int findGhost(const std::string& id);
 
 private:
-	//sf::UdpSocket udpSocket;
-	sf::TcpSocket socket;
+	sf::UdpSocket socket;
+	//sf::TcpSocket socket;
 	sf::Packet threadPacket;
 	std::string myID;
 	sf::Thread* recieveThread = 0;
-	sf::Thread* sendThread = 0;
 	sf::Mutex& mtx;
 	sf::Mutex packetMtx;
 	sf::Mutex socketMtx;
 	std::vector<Ghost>& ghosts;
 	const std::vector<Point>& points;
 	sf::Clock clock;
+	sf::Clock alive;
 	int connected = 0;
 	int quit = 0;
+
+	sf::Clock posClock;
+	float posRate = 1.0 / 30.0;
+	sf::Clock pointClock;
+	float pointRate = 1.0 / 30.0;
+
+	sf::IpAddress ip = "127.0.0.1";
+	int port = 5000;
 };

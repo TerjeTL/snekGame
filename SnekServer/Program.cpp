@@ -46,9 +46,9 @@ void Program::server()
 
 {
 	
-	listener.listen(5000);
-	selector.add(listener);
-	
+	//listener.listen(5000);
+	//selector.add(listener);
+	/*
 	while (!quit)
 
 	{
@@ -58,7 +58,7 @@ void Program::server()
 			if (selector.isReady(listener))
 
 			{
-				sf::TcpSocket* newClient = new sf::TcpSocket;
+				sf::UdpSocket* newClient = new sf::UdpSocket;
 				Socket* socket = new Socket(newClient);
 				if (listener.accept(*newClient) == sf::Socket::Done)
 
@@ -176,21 +176,168 @@ void Program::server()
 			alive.restart();
 		}
 	}
+	*/
+	serverSocket.bind(5000);
+	serverSocket.setBlocking(true);
+	selector.add(serverSocket);
+	while (!quit)
+
+	{
+		if (selector.wait(sf::seconds(2)))
+
+		{
+			
+			if (selector.isReady(serverSocket))
+
+			{
+				sf::Packet packet;
+				sf::IpAddress ip;
+				unsigned short port;
+
+				if (serverSocket.receive(packet, ip, port) == sf::Socket::Done)
+
+				{
+					int connected = -1;
+					for (int i = 0; i < clients.size(); i++)
+
+					{
+						if (clients[i].ip == ip && clients[i].port == port)
+
+						{
+							connected = i;
+							break;
+						}
+					}
+
+					if (connected == -1)
+
+					{
+						std::string s;
+						generateID(s);
+						if (!checkID(s))
+
+						{
+							while (!checkID(s))
+
+							{
+								generateID(s);
+							}
+						}
+						clients.push_back(UdpClient(ip, port, s));
+						sf::Packet sendPacket;
+						myIDPacket myID;
+						sendPacket << myID << s;
+						broadcastUDP(sendPacket, clients.size() - 1, 1);
+						std::cout << "New client " << ip << ":" << port << " id " << s << std::endl;
+						std::cout << clients.size() << " clients connected" << std::endl;
+					}
+
+					else
+
+					{
+						sf::Packet copy = packet;
+						unsigned char msg;
+						copy >> msg;
+						//std::cout << msg << std::endl;
+
+						if (msg == CREA)
+
+						{
+							//std::cout << "create" << std::endl;
+						}
+
+						if (msg == MCLR)
+
+						{
+							std::cout << clients[connected].id << " has reset!" << std::endl;
+						}
+
+						if (msg == ALIV)
+
+						{
+							clients[connected].clock.restart();
+						}
+
+						if (msg == DSCT)
+
+						{
+							disconnect(connected);
+						}
+
+						packet << clients[connected].id;
+						broadcastUDP(packet, connected);
+					}
+				}
+
+				if (alive.getElapsedTime().asSeconds() > 1.0)
+
+				{
+
+					AlivePacket alivePacket;
+					sf::Packet sendPacket;
+					sendPacket << alivePacket;
+					broadcastUDP(sendPacket);
+					alive.restart();
+					
+				}
+			}
+		}
+
+		checkTimeout();
+	}
+}
+
+void Program::disconnect(int index)
+
+{
+	DisconnectPacket disconnectPacket;
+	sf::Packet sendPacket;
+	sendPacket << disconnectPacket;
+	sendPacket << clients[index].id;
+	std::cout << clients[index].id << " on " << clients[index].ip << ":" << clients[index].port << " has timedout/disconnected" << std::endl;
+	broadcastUDP(sendPacket, index);
+	clients.erase(clients.begin() + index);
+	std::cout << clients.size() << " remaining" << std::endl;
+}
+
+void Program::checkTimeout()
+
+{
+	for (int i = 0; i < clients.size(); i++)
+
+	{
+		if (clients[i].clock.getElapsedTime().asSeconds() > 10.0)
+
+		{
+			disconnect(i);
+			i--;
+		}
+	}
+}
+
+void Program::broadcastUDP(sf::Packet& packet, int index, int me)
+
+{
+	for (int i = 0; i < clients.size(); i++)
+
+	{
+		if (i != index && !me) serverSocket.send(packet, clients[i].ip, clients[i].port);
+		else if (me && i == index) serverSocket.send(packet, clients[i].ip, clients[i].port);
+	}
 }
 
 int Program::checkID(std::string& id)
 
 {
-	for (int i = 0; i < sockets.size(); i++)
+	for (int i = 0; i < ids.size(); i++)
 
 	{
-		if (sockets[i]->id == id)
+		if (ids[i] == id)
 
 		{
 			return 0;
 		}
 	}
-
 	return 1;
 }
 

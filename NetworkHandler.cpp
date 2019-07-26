@@ -15,37 +15,39 @@ NetworkHandler::~NetworkHandler()
 		recieveThread->wait();
 		delete recieveThread;
 	}
-
-	if (sendThread)
-
-	{
-		sendThread->wait();
-		delete sendThread;
-	}
 }
 
 void NetworkHandler::sendPos(Vec2f pos, Vec2f vel)
 
 {
-	MovePacket movePacket(pos.x, pos.y, 0.0, 0.0);
-	sf::Packet packetSend;
-	packetSend << movePacket;
-	packetMtx.lock();
-	threadPacket = packetSend;
-	packetMtx.unlock();
-	//socket.send(packetSend);
+	if (posClock.getElapsedTime().asSeconds() > posRate)
+
+	{
+		MovePacket movePacket(pos.x, pos.y, 0.0, 0.0);
+		sf::Packet packetSend;
+		packetSend << movePacket;
+		packetMtx.lock();
+		threadPacket = packetSend;
+		packetMtx.unlock();
+		socket.send(packetSend, ip, port);
+		posClock.restart();
+	}
 }
 
 void NetworkHandler::sendPoint(const Point& point, const std::string& id)
 
 {
-	PointPacket pointPacket(point.position.x, point.position.y, point.type, point.radius);
-	sf::Packet packetSend;
-	packetSend << pointPacket;
-	packetMtx.lock();
-	threadPacket = packetSend;
-	packetMtx.unlock();
-	//socket.send(packetSend);
+	if (pointClock.getElapsedTime().asSeconds() > pointRate)
+
+	{
+		PointPacket pointPacket(point.position.x, point.position.y, point.type, point.radius);
+		sf::Packet packetSend;
+		packetSend << pointPacket;
+		//packetMtx.lock();
+		//threadPacket = packetSend;
+		//packetMtx.unlock();
+		socket.send(packetSend, ip, port);
+	}
 }
 
 void NetworkHandler::sendClear()
@@ -54,11 +56,10 @@ void NetworkHandler::sendClear()
 	ClearPacket clearPacket;
 	sf::Packet packetSend;
 	packetSend << clearPacket;
-	packetMtx.lock();
-	threadPacket = packetSend;
-	packetMtx.unlock();
-	std::cout << "sending" << std::endl;
-	//socket.send(packetSend);
+	//packetMtx.lock();
+	//threadPacket = packetSend;
+	//packetMtx.unlock();
+	socket.send(packetSend, ip, port);
 }
 
 void NetworkHandler::sendCreate()
@@ -67,11 +68,28 @@ void NetworkHandler::sendCreate()
 	CreateGhostPacket createGhostPacket;
 	sf::Packet packetSend;
 	packetSend << createGhostPacket;
-	packetMtx.lock();
-	threadPacket = packetSend;
-	packetMtx.unlock();
-	//socket.send(packetSend);
+	//packetMtx.lock();
+	//threadPacket = packetSend;
+	//packetMtx.unlock();
+	socket.send(packetSend, ip, port);
 	//socket.setBlocking(false);
+}
+
+void NetworkHandler::sendAlive()
+
+{
+	if (alive.getElapsedTime().asSeconds() > 1.0)
+
+	{
+		alive.restart();
+		AlivePacket alivePacket;
+		sf::Packet sendPacket;
+		sendPacket << alivePacket;
+		socketMtx.lock();
+		socket.setBlocking(true);
+		socket.send(sendPacket, ip, port);
+		socketMtx.unlock();
+	}
 }
 
 void NetworkHandler::send()
@@ -85,7 +103,8 @@ void NetworkHandler::send()
 		{
 			socketMtx.lock();
 			socket.setBlocking(true);
-			socket.send(threadPacket);
+			int index = socket.send(threadPacket, ip, port);
+			//std::cout << index << std::endl;
 			socketMtx.unlock();
 			threadPacket.clear();
 		}
@@ -100,7 +119,7 @@ void NetworkHandler::sendUpdateSnakes(std::string id)
 	createGhostPacket.first = 0;
 	packetSend << createGhostPacket;
 	socketMtx.lock();
-	socket.send(packetSend);
+	socket.send(packetSend, ip, port);
 	socketMtx.unlock();
 	for (int i = 0; i < points.size(); i++)
 
@@ -110,7 +129,7 @@ void NetworkHandler::sendUpdateSnakes(std::string id)
 		PointPacket pointPacket(points[i].position.x, points[i].position.y, points[i].type, points[i].radius);
 		pointPacket.id = id;
 		packetSend << pointPacket;
-		socket.send(packetSend);
+		socket.send(packetSend, ip, port);
 	}
 }
 
@@ -126,7 +145,10 @@ void NetworkHandler::receive()
 		sf::Packet packetRecieve;
 		socketMtx.lock();
 		socket.setBlocking(false);
-		int ready = (socket.receive(packetRecieve) == sf::Socket::Done);
+		sf::IpAddress sender;
+		unsigned short senderPort;
+		int ready = (socket.receive(packetRecieve, sender, senderPort) == sf::Socket::Done);
+		//std::cout << sender << ":" << senderPort << std::endl;
 		socketMtx.unlock();
 		if (ready)
 
@@ -136,10 +158,12 @@ void NetworkHandler::receive()
 			packetRecieve >> msg;
 			//std::cout << msg << std::endl;
 			//mtx.lock();
+
+			
+
 			if (msg == MOVE)
 
 			{
-				
 				MovePacket packet;
 				packetRecieve >> packet;
 				std::string id;
@@ -236,7 +260,7 @@ void NetworkHandler::receive()
 		{
 			std::cout << "Lost connection to server" << std::endl;
 			connected = 0;
-			socket.disconnect();
+			//socket.disconnect();
 		}
 
 		
@@ -260,22 +284,25 @@ int NetworkHandler::findGhost(const std::string& id)
 	return -1;
 }
 
-void NetworkHandler::connect(std::string ip, int port)
+void NetworkHandler::connect(std::string ip_, int port_)
 
 {
-	if (!socket.connect(ip, port, sf::seconds(5)))
+	//if (!socket.connect(ip, port, sf::seconds(5)))
 
-	{
-		std::cout << "Connected to " << ip << ":" << port << std::endl;
-	}
+	//{
+	ip = ip_;
+	port = port_;
+	socket.bind(socket.AnyPort);
+	std::cout << "Connected to " << ip << ":" << port << std::endl;
+	//}
+	sf::Packet packet;
+	packet << CreateGhostPacket();
+	socket.send(packet, ip, port);
 	connected = 1;
 	clock.restart();
 
 	recieveThread = new sf::Thread(&NetworkHandler::receive, this);
 	recieveThread->launch();
-
-	sendThread = new sf::Thread(&NetworkHandler::send, this);
-	sendThread->launch();
 }
 
 void NetworkHandler::quitConnection()
@@ -283,6 +310,10 @@ void NetworkHandler::quitConnection()
 {
 	quit = 1;
 	socketMtx.lock();
-	socket.disconnect();
+	DisconnectPacket disconnectPacket;
+	sf::Packet sendPacket;
+	sendPacket << disconnectPacket;
+	socket.send(sendPacket, ip, port);
+	//socket.disconnect();
 	socketMtx.unlock();
 }

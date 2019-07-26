@@ -22,6 +22,7 @@ void Snek::update(std::vector<Ghost>& ghosts, Map& map, std::vector<Point>& food
 
 	networkHandler.sendPos(position, velocity);
 	
+	
 	if (spacer.getElapsedTime().asSeconds() > randSpacer)
 	{
 		dist = 0;
