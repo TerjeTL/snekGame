@@ -14,7 +14,7 @@ public:
 	~NetworkHandler();
 	void receive();
 	void send();
-	void sendPos(Vec2f pos, Vec2f vel);
+	void sendPos(Vec2f pos, Vec2f vel, int pointsAllowed, float bodySize);
 	void sendPoint(const Point& point, const std::string& id = "");
 	void sendClear();
 	void sendCreate();
@@ -41,9 +41,9 @@ private:
 	int quit = 0;
 
 	sf::Clock posClock;
-	float posRate = 1.0 / 30.0;
+	float posRate = 1.0 / 60.0;
 	sf::Clock pointClock;
-	float pointRate = 1.0 / 30.0;
+	float pointRate = 1.0 / 40.0;
 
 	sf::IpAddress ip = "127.0.0.1";
 	int port = 5000;

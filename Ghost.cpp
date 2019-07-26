@@ -16,6 +16,14 @@ void Ghost::update()
 
 {
 	position += velocity;
+	//serverPosition += velocity;
+	//position = serverPosition;
+}
+
+void Ghost::correctPos()
+
+{
+	position = serverPosition;
 }
 
 void Ghost::draw(sf::RenderWindow& window)

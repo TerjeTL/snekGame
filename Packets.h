@@ -17,14 +17,16 @@ struct MovePacket
 
 	}
 
-	MovePacket(float x_, float y_, float velX_, float velY_) : x(x_), y(y_), velX(velX_), velY(velY_)
+	MovePacket(float x_, float y_, float velX_, float velY_, float pointsAllowed_, float bodySize_) : 
+		x(x_), y(y_), velX(velX_), velY(velY_), pointsAllowed(pointsAllowed_), bodySize(bodySize_)
 
 	{
 
 	}
 
 	unsigned char name = MOVE; //Move
-	float x, y, velX, velY;
+	float x, y, velX, velY, bodySize;
+	int pointsAllowed;
 };
 
 struct PointPacket

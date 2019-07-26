@@ -3,13 +3,13 @@
 sf::Packet& operator <<(sf::Packet& packet, const MovePacket& move)
 
 {
-	return packet << move.name << move.x << move.y << move.velX << move.velY;
+	return packet << move.name << move.x << move.y << move.velX << move.velY << move.bodySize << move.pointsAllowed;
 }
 
 sf::Packet& operator >>(sf::Packet& packet, MovePacket& move)
 
 {
-	return packet >> move.x >> move.y >> move.velX >> move.velY;
+	return packet >> move.x >> move.y >> move.velX >> move.velY >> move.bodySize >> move.pointsAllowed;
 }
 
 sf::Packet& operator <<(sf::Packet& packet, const PointPacket& point)

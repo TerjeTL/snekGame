@@ -17,13 +17,13 @@ NetworkHandler::~NetworkHandler()
 	}
 }
 
-void NetworkHandler::sendPos(Vec2f pos, Vec2f vel)
+void NetworkHandler::sendPos(Vec2f pos, Vec2f vel, int pointsAllowed, float bodySize)
 
 {
 	if (posClock.getElapsedTime().asSeconds() > posRate)
 
 	{
-		MovePacket movePacket(pos.x, pos.y, 0.0, 0.0);
+		MovePacket movePacket(pos.x, pos.y, vel.x, vel.y, pointsAllowed, bodySize);
 		sf::Packet packetSend;
 		packetSend << movePacket;
 		packetMtx.lock();
@@ -47,6 +47,7 @@ void NetworkHandler::sendPoint(const Point& point, const std::string& id)
 		//threadPacket = packetSend;
 		//packetMtx.unlock();
 		socket.send(packetSend, ip, port);
+		pointClock.restart();
 	}
 }
 
@@ -170,7 +171,12 @@ void NetworkHandler::receive()
 				packetRecieve >> id;
 				mtx.lock();
 				int index = findGhost(id);
-				if (index != -1) ghosts[index].position.x = packet.x, ghosts[index].position.y = packet.y, ghosts[index].velocity.x = packet.velX, ghosts[index].velocity.y = packet.velY;
+				if (index != -1)
+				{
+					ghosts[index].serverPosition.x = packet.x, ghosts[index].serverPosition.y = packet.y, ghosts[index].velocity.x = packet.velX, ghosts[index].velocity.y = packet.velY;
+					ghosts[index].correctPos();
+					if (packet.pointsAllowed) ghosts[index].points.push_back(Point(Vec2f(packet.x, packet.y), SNAKE, packet.bodySize));
+				}
 				mtx.unlock();
 			}
 
@@ -183,7 +189,7 @@ void NetworkHandler::receive()
 				packetRecieve >> id;
 				mtx.lock();
 				int index = findGhost(id);
-				if (index != -1 && (packet.id == myID || packet.id == "")) ghosts[index].points.push_back(Point(Vec2f(packet.x, packet.y), packet.type, packet.radius));
+				//if (index != -1 && (packet.id == myID || packet.id == "")) ghosts[index].points.push_back(Point(Vec2f(packet.x, packet.y), packet.type, packet.radius));
 				mtx.unlock();
 			}
 

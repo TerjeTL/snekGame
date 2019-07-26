@@ -43,7 +43,7 @@ int Program::mainLoop()
 			update();
 			clockUpdate.restart();
 		}
-
+		networkHandler.sendAlive();
 		//if (!snakes[0].snekRekt && !snakes[1].snekRekt) running = true;
 		
 		//clear
@@ -92,7 +92,7 @@ void Program::update()
 	{
 		ghosts[i].update();
 	}
-	networkHandler.sendAlive();
+	
 	spawnFood();
 }
 

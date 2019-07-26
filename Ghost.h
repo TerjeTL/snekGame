@@ -10,6 +10,7 @@ class Ghost
 public:
 	Ghost(std::string id_);
 	Vec2f position;
+	Vec2f serverPosition;
 	Vec2f velocity;
 	std::vector<Point> points;
 	std::string id;
@@ -18,6 +19,7 @@ public:
 	void reset();
 	void draw(sf::RenderWindow& window);
 	void update();
+	void correctPos();
 
 private:
 };

@@ -20,7 +20,7 @@ void Snek::update(std::vector<Ghost>& ghosts, Map& map, std::vector<Point>& food
 	velocity = normalize(velocity)*speed;
 	position += velocity;
 
-	networkHandler.sendPos(position, velocity);
+	
 	
 	
 	if (spacer.getElapsedTime().asSeconds() > randSpacer)
@@ -35,15 +35,19 @@ void Snek::update(std::vector<Ghost>& ghosts, Map& map, std::vector<Point>& food
 	if (dist < randDist)
 	{
 		spacer.restart();
+		pointsAllowed = 0;
 	}
 	else
 	{
 		points.push_back(Point(position, SNAKE, bodySize));
-		networkHandler.sendPoint(Point(position, SNAKE, bodySize));
+		pointsAllowed = 1;
+		//networkHandler.sendPoint(Point(position, SNAKE, bodySize));
 	}
 	dist += distance(prev, position);
 	//std::cout << snek.dist << std::endl;
 	prev = position;
+
+	networkHandler.sendPos(position, velocity, pointsAllowed, bodySize);
 
 	checkFood(foods, map);
 	edges(map);
