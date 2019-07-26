@@ -3,7 +3,7 @@
 NetworkHandler::NetworkHandler(sf::Mutex& mtx_, std::vector<Ghost>& ghosts_, const std::vector<Point>& points_): mtx(mtx_), ghosts(ghosts_), points(points_)
 
 {
-	//socket.setBlocking(false);
+	socket.setBlocking(false);
 }
 
 NetworkHandler::~NetworkHandler()
@@ -87,7 +87,6 @@ void NetworkHandler::sendAlive()
 		sf::Packet sendPacket;
 		sendPacket << alivePacket;
 		socketMtx.lock();
-		socket.setBlocking(true);
 		socket.send(sendPacket, ip, port);
 		socketMtx.unlock();
 	}
@@ -103,7 +102,6 @@ void NetworkHandler::send()
 
 		{
 			socketMtx.lock();
-			socket.setBlocking(true);
 			int index = socket.send(threadPacket, ip, port);
 			//std::cout << index << std::endl;
 			socketMtx.unlock();
@@ -115,6 +113,7 @@ void NetworkHandler::send()
 void NetworkHandler::sendUpdateSnakes(std::string id)
 
 {
+	std::cout << "test" << std::endl;
 	sf::Packet packetSend;
 	CreateGhostPacket createGhostPacket;
 	createGhostPacket.first = 0;
@@ -137,15 +136,12 @@ void NetworkHandler::sendUpdateSnakes(std::string id)
 void NetworkHandler::receive()
 
 {
-	
+	sf::Packet packetRecieve;
 	while (!quit)
 
 	{
-		
-		
-		sf::Packet packetRecieve;
+		packetRecieve.clear();
 		socketMtx.lock();
-		socket.setBlocking(false);
 		sf::IpAddress sender;
 		unsigned short senderPort;
 		int ready = (socket.receive(packetRecieve, sender, senderPort) == sf::Socket::Done);
@@ -189,7 +185,7 @@ void NetworkHandler::receive()
 				packetRecieve >> id;
 				mtx.lock();
 				int index = findGhost(id);
-				//if (index != -1 && (packet.id == myID || packet.id == "")) ghosts[index].points.push_back(Point(Vec2f(packet.x, packet.y), packet.type, packet.radius));
+				if (index != -1 && (packet.id == myID || packet.id == "")) ghosts[index].points.push_back(Point(Vec2f(packet.x, packet.y), packet.type, packet.radius));
 				mtx.unlock();
 			}
 
@@ -298,7 +294,8 @@ void NetworkHandler::connect(std::string ip_, int port_)
 	//{
 	ip = ip_;
 	port = port_;
-	socket.bind(socket.AnyPort);
+	//for (int i = 0; socket.bind(randomInt() ))
+	socket.bind(5000);
 	std::cout << "Connected to " << ip << ":" << port << std::endl;
 	//}
 	sf::Packet packet;

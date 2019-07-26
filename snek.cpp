@@ -69,40 +69,38 @@ void Snek::update(std::vector<Ghost>& ghosts, Map& map, std::vector<Point>& food
 void Snek::checkFood(std::vector<Point>& foods, Map& map)
 
 {
-	for (int j = 0; j < points.size(); j++)
+	
+	for (int i = 0; i < foods.size(); i++)
 	{
-		for (int k = 0; k < foods.size(); k++)
+		if (distanceSquared(position, foods[i].position) < pow(bodySize + foods[i].radius, 2))
 		{
-			if (distanceSquared(points[j].position, foods[k].position) < pow(bodySize + foods[k].radius, 2))
+			std::cout << foods[i].type << std::endl;
+			switch (foods[i].type)
 			{
-				std::cout << foods[k].type << std::endl;
-				switch (foods[k].type)
-				{
-				case FAST:
-					speedSnek(1);
-					std::cout << "speed" << std::endl;
-					break;
+			case FAST:
+				speedSnek(1);
+				std::cout << "speed" << std::endl;
+				break;
 
-				case SLOW:
-					speedSnek(-1);
-					break;
+			case SLOW:
+				speedSnek(-1);
+				break;
 
-				case FAT: //fat snek
-					fatSnek(1);
-					break;
+			case FAT: //fat snek
+				fatSnek(1);
+				break;
 
-				case THIN: //skinny snek
-					fatSnek(-1);
-					break;
-				case BORDER: //flashy travely boarders
-					map.papersPleaseDisabled(1);
-					break;
-				case SQUARE: //snek is playing snakes
-					squareSnek = true;
-					squareSnekTimer.restart();
-				}
-				foods.erase(foods.begin() + k);
+			case THIN: //skinny snek
+				fatSnek(-1);
+				break;
+			case BORDER: //flashy travely boarders
+				map.papersPleaseDisabled(1);
+				break;
+			case SQUARE: //snek is playing snakes
+				squareSnek = true;
+				squareSnekTimer.restart();
 			}
+			foods.erase(foods.begin() + i);
 		}
 	}
 }
