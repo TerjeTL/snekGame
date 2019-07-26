@@ -3,7 +3,7 @@
 
 Program::Program(int width, int height) : w(width), h(height), area(width, height, height - 100, 5),
 activatorSize(6), running(true), snek(area, networkHandler, mtx, qtree), networkHandler(mtx, ghosts, snek.points), window(sf::VideoMode(width, height), "Sneky boi"),
-spawnTimer(8)
+spawnTimer(4)
 {
 	snek.body.setFillColor(sf::Color::Green);
 	//ghosts.push_back(Ghost());
@@ -78,7 +78,7 @@ void Program::spawnFood(Snek snek) // i have no idea if this mitosis stuff will 
 
 {
 	int spawnTimerCopy = spawnTimer;
-	if (snek.mitosisClock.getElapsedTime().asSeconds() < 4 && snek.mitosis) spawnTimerCopy = 0.4;
+	if (snek.mitosisClock.getElapsedTime().asSeconds() < 4 && snek.mitosis) spawnTimerCopy = 1;
 	else snek.mitosis = false;
 
 	if (spawnClock.getElapsedTime().asSeconds() > spawnTimerCopy)

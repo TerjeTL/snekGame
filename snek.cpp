@@ -24,7 +24,7 @@ void Snek::update(std::vector<Ghost>& ghosts, Map& map, std::vector<Point>& food
 	//checkFood(foods, map);
 	edges(map);
 
-	snekRektOmeter(ghosts, foods, map);
+	if (!wooshSnek) snekRektOmeter(ghosts, foods, map);
 
 	int ch = speedSnek(0);
 	if (ch != 0) speedSnek(ch);
@@ -41,10 +41,9 @@ void Snek::update(std::vector<Ghost>& ghosts, Map& map, std::vector<Point>& food
 void Snek::posUpdate()
 {
 	if (revSnekTimer.getElapsedTime().asSeconds() > 10) revSnek = false;
-	if (revSnek) rotAngle = (-rotAngle);
-
+	if (revSnek) velocity.rotateInPlaze(-rotAngle);
+	else velocity.rotateInPlaze(rotAngle);
 	body.setRadius(bodySize);
-	velocity.rotateInPlaze(rotAngle);
 	velocity = normalize(velocity)*speed;
 	position += velocity;
 }
