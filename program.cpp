@@ -17,7 +17,7 @@ int Program::mainLoop()
 	sf::Event events;
 	sf::Clock clockUpdate;
 	//NetworkHandler 
-	networkHandler.connect("82.47.120.89", 5000);
+	networkHandler.connect("127.0.0.1", 5000);
 	networkHandler.sendCreate();
 	
 	if (!window.isOpen())

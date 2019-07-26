@@ -36,7 +36,7 @@ void NetworkHandler::sendPos(Vec2f pos, Vec2f vel)
 	//socket.send(packetSend);
 }
 
-void NetworkHandler::sendPoint(const Point& point)
+void NetworkHandler::sendPoint(const Point& point, const std::string& id)
 
 {
 	PointPacket pointPacket(point.position.x, point.position.y, point.type, point.radius);
@@ -57,6 +57,7 @@ void NetworkHandler::sendClear()
 	packetMtx.lock();
 	threadPacket = packetSend;
 	packetMtx.unlock();
+	std::cout << "sending" << std::endl;
 	//socket.send(packetSend);
 }
 
@@ -98,11 +99,14 @@ void NetworkHandler::sendUpdateSnakes(std::string id)
 	CreateGhostPacket createGhostPacket;
 	createGhostPacket.first = 0;
 	packetSend << createGhostPacket;
+	socketMtx.lock();
 	socket.send(packetSend);
+	socketMtx.unlock();
 	for (int i = 0; i < points.size(); i++)
 
 	{
 		packetSend.clear();
+		//sendPoint(points[i], id);
 		PointPacket pointPacket(points[i].position.x, points[i].position.y, points[i].type, points[i].radius);
 		pointPacket.id = id;
 		packetSend << pointPacket;
@@ -117,20 +121,21 @@ void NetworkHandler::receive()
 	while (!quit)
 
 	{
-
-		unsigned char msg;
+		
+		
 		sf::Packet packetRecieve;
 		socketMtx.lock();
 		socket.setBlocking(false);
-		//int ready = (socket.receive(packetRecieve) == sf::Socket::Done);
+		int ready = (socket.receive(packetRecieve) == sf::Socket::Done);
 		socketMtx.unlock();
-		while (socket.receive(packetRecieve) == sf::Socket::Done)
+		if (ready)
 
 		{
 			
+			unsigned char msg;
 			packetRecieve >> msg;
 			//std::cout << msg << std::endl;
-			mtx.lock();
+			//mtx.lock();
 			if (msg == MOVE)
 
 			{
@@ -139,9 +144,10 @@ void NetworkHandler::receive()
 				packetRecieve >> packet;
 				std::string id;
 				packetRecieve >> id;
+				mtx.lock();
 				int index = findGhost(id);
 				if (index != -1) ghosts[index].position.x = packet.x, ghosts[index].position.y = packet.y, ghosts[index].velocity.x = packet.velX, ghosts[index].velocity.y = packet.velY;
-				
+				mtx.unlock();
 			}
 
 			if (msg == NPNT)
@@ -151,8 +157,10 @@ void NetworkHandler::receive()
 				packetRecieve >> packet;
 				std::string id;
 				packetRecieve >> id;
+				mtx.lock();
 				int index = findGhost(id);
 				if (index != -1 && (packet.id == myID || packet.id == "")) ghosts[index].points.push_back(Point(Vec2f(packet.x, packet.y), packet.type, packet.radius));
+				mtx.unlock();
 			}
 
 			if (msg == CREA)
@@ -162,9 +170,11 @@ void NetworkHandler::receive()
 				CreateGhostPacket packet;
 				packetRecieve >> packet;
 				packetRecieve >> id;
+				mtx.lock();
 				std::cout << "Created ghost with " << id << std::endl;
 				ghosts.push_back(Ghost(id));
 				if (packet.first) sendUpdateSnakes(id);
+				mtx.unlock();
 			}
 
 			if (msg == MCLR)
@@ -172,8 +182,10 @@ void NetworkHandler::receive()
 			{
 				std::string id;
 				packetRecieve >> id;
+				mtx.lock();
 				int index = findGhost(id);
 				if (index != -1) ghosts[index].reset();
+				mtx.unlock();
 			}
 
 			if (msg == MYID)
@@ -190,6 +202,7 @@ void NetworkHandler::receive()
 			{
 				std::string id;
 				packetRecieve >> id;
+				mtx.lock();
 				if (ghosts.size() == 1)
 
 				{
@@ -202,6 +215,7 @@ void NetworkHandler::receive()
 					int index = findGhost(id);
 					if (index != -1) ghosts.erase(ghosts.begin() + index);
 				}
+				mtx.unlock();
 			}
 
 			if (msg == ALIV)
@@ -209,8 +223,12 @@ void NetworkHandler::receive()
 			{
 				clock.restart();
 			}
-
-			mtx.unlock();
+			//mtx.unlock();
+			packetRecieve.clear();
+			//socketMtx.lock();
+			//socket.setBlocking(false);
+			//ready = (socket.receive(packetRecieve) == sf::Socket::Done);
+			//socketMtx.unlock();
 		}
 
 		if (clock.getElapsedTime().asSeconds() > 10 && connected)
@@ -220,6 +238,8 @@ void NetworkHandler::receive()
 			connected = 0;
 			socket.disconnect();
 		}
+
+		
 	}
 }
 
@@ -243,7 +263,7 @@ int NetworkHandler::findGhost(const std::string& id)
 void NetworkHandler::connect(std::string ip, int port)
 
 {
-	if (socket.connect(ip, port, sf::seconds(5)))
+	if (!socket.connect(ip, port, sf::seconds(5)))
 
 	{
 		std::cout << "Connected to " << ip << ":" << port << std::endl;

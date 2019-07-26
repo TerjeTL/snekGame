@@ -15,7 +15,7 @@ public:
 	void receive();
 	void send();
 	void sendPos(Vec2f pos, Vec2f vel);
-	void sendPoint(const Point& point);
+	void sendPoint(const Point& point, const std::string& id = "");
 	void sendClear();
 	void sendCreate();
 	void sendUpdateSnakes(std::string id);
