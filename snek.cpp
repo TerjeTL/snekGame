@@ -1,8 +1,7 @@
 #include "snek.h"
-#include <Maths.h>
-#include <math.h>
 
-Snek::Snek(Map& map) : bodySize(3), body(3, 70), rotAngle(0.0), dist(0), snekOrigin(map.origin), position(100, 100), velocity(1, 0)
+Snek::Snek(Map& map, NetworkHandler& networkHandler_) : bodySize(3), body(3, 70), rotAngle(0.0), dist(0), snekOrigin(map.origin), position(100, 100), velocity(1, 0),
+networkHandler(networkHandler_)
 {
 	resetPos(map);
 	snekRekt, allowedToMakePoint = false, true;
@@ -20,6 +19,8 @@ void Snek::update(std::vector<Ghost>& ghosts, Map& map, std::vector<Point>& food
 	velocity.rotateInPlaze(rotAngle);
 	velocity = normalize(velocity)*speed;
 	position += velocity;
+
+	networkHandler.sendPos(position);
 	
 	if (spacer.getElapsedTime().asSeconds() > randSpacer)
 	{
@@ -37,6 +38,7 @@ void Snek::update(std::vector<Ghost>& ghosts, Map& map, std::vector<Point>& food
 	else
 	{
 		points.push_back(Point(position, SNAKE, bodySize));
+		networkHandler.sendPoint(Point(position, SNAKE, bodySize));
 	}
 	dist += distance(prev, position);
 	//std::cout << snek.dist << std::endl;

@@ -1,8 +1,8 @@
 #include "program.h"
 
 
-Program::Program(int width, int height) : w(width), h(height), window(sf::VideoMode(width, height), "SFML Test"), area(width, height, height - 100, 5),
-activatorSize(6), running(true), snek(area)
+Program::Program(int width, int height) : w(width), h(height), area(width, height, height - 100, 5),
+activatorSize(6), running(true), snek(area, networkHandler), networkHandler(mtx, ghosts), window(sf::VideoMode(width, height), "Sneky boi")
 {
 	snek.body.setFillColor(sf::Color::Green);
 	ghosts.push_back(Ghost());
@@ -16,8 +16,8 @@ int Program::mainLoop()
 {
 	sf::Event events;
 	sf::Clock clockUpdate;
-	NetworkHandler networkHandler(mtx, snek, ghosts);
-	networkHandler.connect("82.47.120.89", 5000);
+	//NetworkHandler 
+	networkHandler.connect("127.0.0.1", 5000);
 
 	if (!window.isOpen())
 	{
@@ -40,7 +40,6 @@ int Program::mainLoop()
 		if (clockUpdate.getElapsedTime().asSeconds() >= 1.0 / 60.0 && running)
 		{
 			update();
-			networkHandler.sendPos();
 			clockUpdate.restart();
 		}
 		//if (!snakes[0].snekRekt && !snakes[1].snekRekt) running = true;
@@ -80,7 +79,6 @@ void Program::update()
 	{
 		running = false;
 	}
-	
 	snek.update(ghosts, area, foods);
 
 	spawnFood();
@@ -119,6 +117,7 @@ void Program::reset()
 		snek.points.clear();
 		snek.resetPos(area);
 		snek.snekRekt = false;
+		running = true;
 		foods.clear();
 	}
 }

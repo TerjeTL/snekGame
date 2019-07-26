@@ -4,13 +4,14 @@
 #include "map.h"
 #include "Point.h"
 #include "Ghost.h"
+#include "NetworkHandler.h"
 
 #define PI 3.14159
 
 class Snek
 {
 public:
-	Snek(Map& map);
+	Snek(Map& map, NetworkHandler& networkHandler_);
 
 	void update(std::vector<Ghost>& ghosts, Map& map, std::vector<Point>& foods);
 	void checkFood(std::vector<Point>& foods, Map& map);
@@ -46,7 +47,7 @@ private:
 	float rotAngle;
 	float randSpacer;
 	float dist;
-
+	NetworkHandler& networkHandler;
 	Vec2f prev;
 	Vec2f velocity;	
 };

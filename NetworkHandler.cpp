@@ -1,6 +1,6 @@
 #include "NetworkHandler.h"
 
-NetworkHandler::NetworkHandler(sf::Mutex& mtx_, const Snek& snek_, std::vector<Ghost>& ghosts_): mtx(mtx_), snek(snek_), ghosts(ghosts_)
+NetworkHandler::NetworkHandler(sf::Mutex& mtx_, std::vector<Ghost>& ghosts_): mtx(mtx_), ghosts(ghosts_)
 
 {
 
@@ -17,12 +17,21 @@ NetworkHandler::~NetworkHandler()
 	}
 }
 
-void NetworkHandler::sendPos()
+void NetworkHandler::sendPos(Vec2f pos)
 
 {
-	MovePacket movePacket(snek.position.x, snek.position.y, 0, 0);
+	MovePacket movePacket(pos.x, pos.y, 0, 0);
 	sf::Packet packetSend;
 	packetSend << movePacket;
+	socket.send(packetSend);
+}
+
+void NetworkHandler::sendPoint(const Point& point)
+
+{
+	PointPacket pointPacket(point.position.x, point.position.y, point.type, point.radius);
+	sf::Packet packetSend;
+	packetSend << pointPacket;
 	socket.send(packetSend);
 }
 
@@ -52,7 +61,7 @@ void NetworkHandler::receive()
 				ghosts[0].position.y = packet.y;
 			}
 
-			if (msg == "point")
+			if (msg == "npnt")
 
 			{
 				PointPacket packet;
