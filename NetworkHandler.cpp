@@ -13,7 +13,7 @@ NetworkHandler::~NetworkHandler()
 
 	{
 		recieveThread->wait();
-		delete recieveThread;
+		if (recieveThread != nullptr) delete recieveThread;
 	}
 }
 
@@ -169,7 +169,7 @@ void NetworkHandler::receive()
 				int index = findGhost(id);
 				if (index != -1)
 				{
-					ghosts[index].serverPosition.x = packet.x, ghosts[index].serverPosition.y = packet.y, ghosts[index].velocity.x = packet.velX, ghosts[index].velocity.y = packet.velY;
+					ghosts[index].serverPosition.x = packet.x, ghosts[index].serverPosition.y = packet.y, ghosts[index].velocity.x = packet.velX, ghosts[index].velocity.y = packet.velY, ghosts[index].bodySize = packet.bodySize;
 					ghosts[index].correctPos();
 					if (packet.pointsAllowed) ghosts[index].points.push_back(Point(Vec2f(packet.x, packet.y), SNAKE, packet.bodySize));
 				}
@@ -294,9 +294,16 @@ void NetworkHandler::connect(std::string ip_, int port_)
 	//{
 	ip = ip_;
 	port = port_;
-	//for (int i = 0; socket.bind(randomInt() ))
-	socket.bind(5000);
-	std::cout << "Connected to " << ip << ":" << port << std::endl;
+	int code = socket.bind(5000);
+	int i = 0;
+	while (code)
+
+	{
+		i++;
+		code = socket.bind(port + i);
+	}
+
+	std::cout << "Connected to " << ip << ":" << port << " on port " << port+i << std::endl;
 	//}
 	sf::Packet packet;
 	packet << CreateGhostPacket();

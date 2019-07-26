@@ -1,7 +1,7 @@
 #include "snek.h"
 
-Snek::Snek(Map& map, NetworkHandler& networkHandler_, sf::Mutex& mtx_) : bodySize(3), body(3, 70), rotAngle(0.0), dist(0), snekOrigin(map.origin), position(100, 100), velocity(1, 0),
-networkHandler(networkHandler_), mtx(mtx_), squareSnek(false)
+Snek::Snek(Map& map, NetworkHandler& networkHandler_, sf::Mutex& mtx_, QuadTree*& qtree_) : bodySize(3), body(3, 70), rotAngle(0.0), dist(0), snekOrigin(map.origin), position(100, 100), velocity(1, 0),
+networkHandler(networkHandler_), mtx(mtx_), squareSnek(false), qtree(qtree_)
 {
 	resetPos(map);
 	snekRekt, allowedToMakePoint = false, true;
@@ -49,10 +49,10 @@ void Snek::update(std::vector<Ghost>& ghosts, Map& map, std::vector<Point>& food
 
 	networkHandler.sendPos(position, velocity, pointsAllowed, bodySize);
 
-	checkFood(foods, map);
+	//checkFood(foods, map);
 	edges(map);
 
-	snekRektOmeter(ghosts);
+	snekRektOmeter(ghosts, foods, map);
 
 	int ch = speedSnek(0);
 	if (ch != 0) speedSnek(ch);
@@ -66,42 +66,42 @@ void Snek::update(std::vector<Ghost>& ghosts, Map& map, std::vector<Point>& food
 	}
 }
 
-void Snek::checkFood(std::vector<Point>& foods, Map& map)
+void Snek::checkFood(Point point, Map& map, std::vector<Point>& foods)
 
 {
 	
-	for (int i = 0; i < foods.size(); i++)
+	switch (point.type)
+
 	{
-		if (distanceSquared(position, foods[i].position) < pow(bodySize + foods[i].radius, 2))
-		{
-			std::cout << foods[i].type << std::endl;
-			switch (foods[i].type)
-			{
-			case FAST:
-				speedSnek(1);
-				std::cout << "speed" << std::endl;
-				break;
+		case FAST:
+			speedSnek(1);
+			std::cout << "speed" << std::endl;
+			break;
 
-			case SLOW:
-				speedSnek(-1);
-				break;
+		case SLOW:
+			speedSnek(-1);
+			break;
 
-			case FAT: //fat snek
-				fatSnek(1);
-				break;
+		case FAT: //fat snek
+			fatSnek(1);
+			break;
 
-			case THIN: //skinny snek
-				fatSnek(-1);
-				break;
-			case BORDER: //flashy travely boarders
-				map.papersPleaseDisabled(1);
-				break;
-			case SQUARE: //snek is playing snakes
-				squareSnek = true;
-				squareSnekTimer.restart();
-			}
-			foods.erase(foods.begin() + i);
-		}
+		case THIN: //skinny snek
+			fatSnek(-1);
+			break;
+		case BORDER: //flashy travely boarders
+			map.papersPleaseDisabled(1);
+			break;
+		case SQUARE: //snek is playing snakes
+			squareSnek = true;
+			squareSnekTimer.restart();
+	}
+	foods.erase(foods.begin() + point.id);
+
+	for (int i = 0; i < foods.size(); i++)
+
+	{
+		foods[i].id = i;
 	}
 }
 
@@ -165,9 +165,10 @@ void Snek::setRotSpeed(float speed)
 	rotSpeed = speed;
 }
 
-void Snek::snekRektOmeter(std::vector<Ghost>& ghosts)
+void Snek::snekRektOmeter(std::vector<Ghost>& ghosts, std::vector<Point>& foods, Map& map)
 {
 	//checks if he reks himself
+	/*
 	for (int i = 0; i < ghosts.size(); i++)
 
 	{
@@ -194,6 +195,31 @@ void Snek::snekRektOmeter(std::vector<Ghost>& ghosts)
 		{
 			snekRekt = true;
 			break;
+		}
+	}
+	*/
+	std::vector<Point> pointsFound;
+	if (qtree != nullptr) qtree->query(pointsFound, Boundary(1.0, 1.0, position.x, position.y, 10));
+
+
+	for (int i = 0; i < pointsFound.size(); i++)
+
+	{
+		Point point = pointsFound[i];
+		if (distanceSquared(position, point.position) < pow(bodySize + point.radius, 2))
+		{
+			if (point.type == SNAKE)
+
+			{
+				snekRekt = true;
+				break;
+			}
+			
+			else
+
+			{
+				checkFood(point, map, foods);
+			}
 		}
 	}
 

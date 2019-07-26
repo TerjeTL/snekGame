@@ -5,21 +5,22 @@
 #include "Point.h"
 #include "Ghost.h"
 #include "NetworkHandler.h"
+#include "QuadTree.h"
 
 #define PI 3.14159
 
 class Snek
 {
 public:
-	Snek(Map& map, NetworkHandler& networkHandler_, sf::Mutex& mtx_);
+	Snek(Map& map, NetworkHandler& networkHandler_, sf::Mutex& mtx_, QuadTree*& qtree_);
 
 	void update(std::vector<Ghost>& ghosts, Map& map, std::vector<Point>& foods);
-	void checkFood(std::vector<Point>& foods, Map& map);
+	void checkFood(Point point, Map& map, std::vector<Point>& foods);
 	void draw(sf::RenderWindow& window);
 	void setRotAngle(float rad);
 	void setRotSpeed(float speed);
 	void resetPos(const Map& map);
-	void snekRektOmeter(std::vector<Ghost>& ghosts);
+	void snekRektOmeter(std::vector<Ghost>& ghosts, std::vector<Point>& foods, Map& map);
 	void edges(Map& map);
 	float randNumber(float max, float min);
 
@@ -52,5 +53,6 @@ private:
 	float dist;
 	NetworkHandler& networkHandler;
 	Vec2f prev;
+	QuadTree*& qtree;
 	
 };

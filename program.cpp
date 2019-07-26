@@ -2,14 +2,26 @@
 
 
 Program::Program(int width, int height) : w(width), h(height), area(width, height, height - 100, 5),
-activatorSize(6), running(true), snek(area, networkHandler, mtx), networkHandler(mtx, ghosts, snek.points), window(sf::VideoMode(width, height), "Sneky boi")
+activatorSize(6), running(true), snek(area, networkHandler, mtx, qtree), networkHandler(mtx, ghosts, snek.points), window(sf::VideoMode(width, height), "Sneky boi")
 {
 	snek.body.setFillColor(sf::Color::Green);
 	//ghosts.push_back(Ghost());
 	/*snakes.push_back(Snek(area));
 	snakes[1].body.setFillColor(sf::Color::Red);*/
 
+	qtree = new QuadTree(Boundary(width, height, width / 2, height / 2), 10);
+
 	//std::cout << colors[0][1] << std::endl;
+}
+
+Program::~Program()
+
+{
+	if (qtree != nullptr)
+
+	{
+		delete qtree;
+	}
 }
 
 int Program::mainLoop()
@@ -71,8 +83,8 @@ void Program::spawnFood()
 		position.x = randomInt(area.origin.x, area.origin.x + area.size);
 		position.y = randomInt(area.origin.y, area.origin.y + area.size);
 		int type = randomInt(1, 6);
-
-		foods.push_back(Point(position, type, activatorSize));
+		int id = foods.size();
+		foods.push_back(Point(position, type, activatorSize, id));
 		spawnClock.restart();
 	}
 }
@@ -80,6 +92,33 @@ void Program::spawnFood()
 
 void Program::update()
 {
+	if (qtree != nullptr) delete qtree;
+	qtree = new QuadTree(Boundary(w, h, w / 2, h / 2), 10);
+	int loop = 0;
+	if (snek.points.size() > 7) loop = 1;
+
+	for (int i = 0; i < snek.points.size() - 7 && loop; i++)
+
+	{
+		qtree->insert(Point(snek.points[i].position, snek.points[i].type, snek.points[i].radius));
+	}
+
+	for (int i = 0; i < ghosts.size(); i++)
+
+	{
+		for (int j = 0; j < ghosts[i].points.size(); j++)
+
+		{
+			qtree->insert(Point(ghosts[i].points[j].position, ghosts[i].points[j].type, ghosts[i].points[j].radius));
+		}
+	}
+
+	for (int i = 0; i < foods.size(); i++)
+
+	{
+		qtree->insert(Point(foods[i].position, foods[i].type, foods[i].radius, foods[i].id));
+	}
+
 	if (snek.snekRekt)
 
 	{
@@ -101,14 +140,16 @@ void Program::draw()
 	//mtx.lock();
 	area.draw(window);
 	snek.draw(window);
-	//mtx.lock();
+	mtx.lock();
 	std::vector<Ghost> ghostsCopy = ghosts;
-	//mtx.unlock();
+	mtx.unlock();
 	for (int i = 0; i < ghostsCopy.size(); i++)
 
 	{
 		ghostsCopy[i].draw(window);
 	}
+
+	//qtree->draw(window);
 
 	sf::CircleShape food(activatorSize);
 	food.setOrigin(activatorSize, activatorSize);

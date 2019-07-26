@@ -6,10 +6,12 @@
 #include "map.h"
 #include "food.h"
 #include "Ghost.h"
+#include "QuadTree.h"
 class Program
 {
 public:
 	Program(int width, int height);
+	~Program();
 	int mainLoop();
 	int randomInt(int min, int max);
 	void draw();
@@ -32,6 +34,7 @@ private:
 	sf::Clock spawnClock;
 	std::vector<Point> foods;
 	sf::Mutex mtx;
+	QuadTree* qtree;
 	
 	NetworkHandler networkHandler;
 };

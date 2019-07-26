@@ -24,7 +24,14 @@ struct Point
 
 	}
 
+	Point(Vec2f position_, int type_, float radius_, int id_) : position(position_), type(type_), radius(radius_), id(id_)
+
+	{
+
+	}
+
 	Vec2f position;
 	int type;
 	float radius;
+	int id = -1;
 };
