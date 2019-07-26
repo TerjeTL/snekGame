@@ -3,7 +3,7 @@
 NetworkHandler::NetworkHandler(sf::Mutex& mtx_, std::vector<Ghost>& ghosts_, const std::vector<Point>& points_): mtx(mtx_), ghosts(ghosts_), points(points_)
 
 {
-
+	socket.setBlocking(false);
 }
 
 NetworkHandler::~NetworkHandler()
@@ -14,6 +14,13 @@ NetworkHandler::~NetworkHandler()
 	{
 		recieveThread->wait();
 		delete recieveThread;
+	}
+
+	if (sendThread)
+
+	{
+		sendThread->wait();
+		delete sendThread;
 	}
 }
 
@@ -76,7 +83,7 @@ void NetworkHandler::sendUpdateSnakes(std::string id)
 void NetworkHandler::receive()
 
 {
-	socket.setBlocking(false);
+	
 	while (!quit)
 
 	{
@@ -84,7 +91,7 @@ void NetworkHandler::receive()
 		std::string msg;
 		sf::Packet packetRecieve;
 		mtx.lock();
-		int ready = (socket.receive(packetRecieve) != sf::Socket::NotReady);
+		int ready = (socket.receive(packetRecieve) == sf::Socket::Done);
 		mtx.unlock();
 		if (ready)
 

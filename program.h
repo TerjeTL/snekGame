@@ -14,6 +14,7 @@ public:
 	int randomInt(int min, int max);
 	void draw();
 	void update();
+	void updateThread();
 	void eventHandler(sf::Event events);
 	void spawnFood();
 	void reset();
@@ -27,6 +28,7 @@ private:
 	int w, h;
 	int activatorSize;
 	int colors[5][3] = { {0, 255, 0},  {255, 0, 0}, {255, 0, 255}, {0, 255, 255}, {255, 160, 60} };
+	int quit = 0;
 	sf::RenderWindow window;
 	sf::Clock spawnClock;
 	std::vector<Point> foods;
