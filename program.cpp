@@ -15,17 +15,16 @@ activatorSize(6), running(true), snek(area, networkHandler, mtx), networkHandler
 int Program::mainLoop()
 {
 	sf::Event events;
-	sf::Thread* thread = 0;
+	sf::Clock clockUpdate;
 	//NetworkHandler 
 	networkHandler.connect("82.47.120.89", 5000);
 	networkHandler.sendCreate();
+	
 	if (!window.isOpen())
 	{
 		return EXIT_FAILURE;
 	}
-
-	thread = new sf::Thread(&Program::updateThread, this);
-	thread->launch();
+	
 
 	while (window.isOpen())
 	{
@@ -39,22 +38,22 @@ int Program::mainLoop()
 			eventHandler(events);
 		}
 
+		if (clockUpdate.getElapsedTime().asSeconds() >= 1.0 / 60.0 && running)
+		{
+			update();
+			clockUpdate.restart();
+		}
 
 		//if (!snakes[0].snekRekt && !snakes[1].snekRekt) running = true;
 		
 		//clear
 		window.clear(sf::Color::Black);
 		//Draw
+		//std::cout << "wait" << std::endl;
 		draw();
+		//std::cout << "wait" << std::endl;
 		//Display
 		window.display();
-	}
-	quit = 1;
-	if (thread)
-
-	{
-		thread->wait();
-		delete thread;
 	}
 
 	networkHandler.quitConnection();
@@ -66,14 +65,11 @@ void Program::updateThread()
 
 {
 	sf::Clock clockUpdate;
+	networkHandler.sendCreate();
 	while (!quit)
 
 	{
-		if (clockUpdate.getElapsedTime().asSeconds() >= 1.0 / 60.0 && running)
-		{
-			update();
-			clockUpdate.restart();
-		}
+		
 	}
 }
 
@@ -114,19 +110,21 @@ void Program::update()
 
 void Program::draw()
 {
-	mtx.lock();
+	//mtx.lock();
 	area.draw(window);
 	snek.draw(window);
-
-	for (int i = 0; i < ghosts.size(); i++)
+	//mtx.lock();
+	std::vector<Ghost> ghostsCopy = ghosts;
+	//mtx.unlock();
+	for (int i = 0; i < ghostsCopy.size(); i++)
 
 	{
-		ghosts[i].draw(window);
+		ghostsCopy[i].draw(window);
 	}
 
 	sf::CircleShape food(activatorSize);
 	food.setOrigin(activatorSize, activatorSize);
-
+	//mtx.lock();
 	for (int i = 0; i < foods.size(); i++)
 
 	{
@@ -135,7 +133,7 @@ void Program::draw()
 		food.setPosition(foods[i].position.x, foods[i].position.y);
 		window.draw(food);
 	}
-	mtx.unlock();
+	//mtx.unlock();
 }
 
 void Program::reset()

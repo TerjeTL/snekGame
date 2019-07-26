@@ -1,5 +1,11 @@
 #pragma once
 #include <SFML/Network.hpp>
+#define MOVE 0
+#define NPNT 1
+#define CREA 2
+#define MCLR 3
+#define MYID 4
+#define DSCT 5
 
 struct MovePacket
 
@@ -16,7 +22,7 @@ struct MovePacket
 
 	}
 
-	char name[5] = "move";
+	unsigned char name = MOVE; //Move
 	float x, y, velX, velY;
 };
 
@@ -35,7 +41,7 @@ struct PointPacket
 
 	}
 
-	char name[5] = "npnt";
+	unsigned char name = NPNT;
 	int type;
 	float x, y, radius;
 	std::string id = "";
@@ -50,7 +56,7 @@ struct CreateGhostPacket
 
 	}
 
-	char name[5] = "crea";
+	unsigned char name = CREA;
 	int first = 1;
 };
 
@@ -63,7 +69,7 @@ struct ClearPacket
 
 	}
 
-	char name[5] = "mclr";
+	unsigned char name = MCLR;
 };
 
 struct myIDPacket
@@ -75,7 +81,7 @@ struct myIDPacket
 
 	}
 
-	char name[5] = "myid";
+	unsigned char name = MYID;
 };
 
 struct DisconnectPacket
@@ -87,7 +93,7 @@ struct DisconnectPacket
 
 	}
 
-	char name[5] = "dsct";
+	unsigned char name = DSCT;
 };
 
 sf::Packet& operator <<(sf::Packet& packet, const MovePacket& move);

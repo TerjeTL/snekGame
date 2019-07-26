@@ -142,15 +142,21 @@ void Program::server()
 							std::string id = sockets[i]->id;
 							recievePacket << id;
 							sf::Packet copy = recievePacket;
-							std::string msg;
+							unsigned char msg;
 							copy >> msg;
+							//std::cout << msg << std::endl;
 
-							if (msg == "mclr")
+							if (msg == CREA)
+
+							{
+								std::cout << "create" << std::endl;
+							}
+
+							if (msg == MCLR)
 
 							{
 								std::cout << id << " has reset!" << std::endl;
 							}
-
 							broadcast(recievePacket, i);
 						}
 						

@@ -13,6 +13,7 @@ public:
 	NetworkHandler(sf::Mutex& mtx_, std::vector<Ghost>& ghosts_, const std::vector<Point>& points_);
 	~NetworkHandler();
 	void receive();
+	void send();
 	void sendPos(Vec2f pos, Vec2f vel);
 	void sendPoint(const Point& point);
 	void sendClear();
@@ -25,10 +26,13 @@ public:
 private:
 	//sf::UdpSocket udpSocket;
 	sf::TcpSocket socket;
+	sf::Packet threadPacket;
 	std::string myID;
 	sf::Thread* recieveThread = 0;
 	sf::Thread* sendThread = 0;
 	sf::Mutex& mtx;
+	sf::Mutex packetMtx;
+	sf::Mutex socketMtx;
 	std::vector<Ghost>& ghosts;
 	const std::vector<Point>& points;
 	int quit = 0;
