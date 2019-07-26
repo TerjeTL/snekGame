@@ -15,7 +15,7 @@ activatorSize(6), running(true), snek(area, networkHandler), networkHandler(mtx,
 int Program::mainLoop()
 {
 	sf::Event events;
-	sf::Clock clockUpdate;
+	sf::Thread* thread = 0;
 	//NetworkHandler 
 	networkHandler.connect("82.47.120.89", 5000);
 	networkHandler.sendCreate();
@@ -23,6 +23,9 @@ int Program::mainLoop()
 	{
 		return EXIT_FAILURE;
 	}
+
+	thread = new sf::Thread(&Program::updateThread, this);
+	thread->launch();
 
 	while (window.isOpen())
 	{
@@ -37,11 +40,6 @@ int Program::mainLoop()
 		}
 
 
-		if (clockUpdate.getElapsedTime().asSeconds() >= 1.0 / 60.0 && running)
-		{
-			update();
-			clockUpdate.restart();
-		}
 		//if (!snakes[0].snekRekt && !snakes[1].snekRekt) running = true;
 		
 		//clear
@@ -51,9 +49,32 @@ int Program::mainLoop()
 		//Display
 		window.display();
 	}
+	quit = 1;
+	if (thread)
+
+	{
+		thread->wait();
+		delete thread;
+	}
+
 	networkHandler.quitConnection();
 	std::cout << "Shutting down" << std::endl;
 	return EXIT_SUCCESS;
+}
+
+void Program::updateThread()
+
+{
+	sf::Clock clockUpdate;
+	while (!quit)
+
+	{
+		if (clockUpdate.getElapsedTime().asSeconds() >= 1.0 / 60.0 && running)
+		{
+			update();
+			clockUpdate.restart();
+		}
+	}
 }
 
 void Program::spawnFood()
@@ -93,6 +114,7 @@ void Program::update()
 
 void Program::draw()
 {
+	mtx.lock();
 	area.draw(window);
 	snek.draw(window);
 
@@ -113,6 +135,7 @@ void Program::draw()
 		food.setPosition(foods[i].position.x, foods[i].position.y);
 		window.draw(food);
 	}
+	mtx.unlock();
 }
 
 void Program::reset()

@@ -14,6 +14,7 @@ public:
 	int randomInt(int min, int max);
 	void draw();
 	void update();
+	void updateThread();
 	void eventHandler(sf::Event events);
 	void spawnFood();
 	void reset();

@@ -23,9 +23,11 @@ public:
 	int findGhost(const std::string& id);
 
 private:
+	//sf::UdpSocket udpSocket;
 	sf::TcpSocket socket;
 	std::string myID;
 	sf::Thread* recieveThread = 0;
+	sf::Thread* sendThread = 0;
 	sf::Mutex& mtx;
 	std::vector<Ghost>& ghosts;
 	const std::vector<Point>& points;
