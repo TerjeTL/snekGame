@@ -27,8 +27,8 @@ void Snek::update(std::vector<Ghost>& ghosts, Map& map, std::vector<Point>& food
 		dist = 0;
 		spacer.restart();
 		randSpacer = randNumber(1.6, 0.6);
-		//std::cout << randSpacer << std::endl;
-		randDist = randomInt(25, 7);
+		randDist = randomInt(3*bodySize + 9, 3 * bodySize + 25);
+		std::cout << randDist << std::endl;
 
 	}
 	if (dist < randDist)
