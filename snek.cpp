@@ -1,7 +1,7 @@
 #include "snek.h"
 
-Snek::Snek(Map& map, NetworkHandler& networkHandler_) : bodySize(3), body(3, 70), rotAngle(0.0), dist(0), snekOrigin(map.origin), position(100, 100), velocity(1, 0),
-networkHandler(networkHandler_)
+Snek::Snek(Map& map, NetworkHandler& networkHandler_, sf::Mutex& mtx_) : bodySize(3), body(3, 70), rotAngle(0.0), dist(0), snekOrigin(map.origin), position(100, 100), velocity(1, 0),
+networkHandler(networkHandler_), mtx(mtx_)
 {
 	resetPos(map);
 	snekRekt, allowedToMakePoint = false, true;

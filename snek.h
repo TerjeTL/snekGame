@@ -11,7 +11,7 @@
 class Snek
 {
 public:
-	Snek(Map& map, NetworkHandler& networkHandler_);
+	Snek(Map& map, NetworkHandler& networkHandler_, sf::Mutex& mtx_);
 
 	void update(std::vector<Ghost>& ghosts, Map& map, std::vector<Point>& foods);
 	void checkFood(std::vector<Point>& foods, Map& map);
@@ -39,7 +39,7 @@ public:
 	Vec2i snekOrigin;
 private:
 	
-	
+	sf::Mutex& mtx;
 	sf::Clock spacer, speedSnekClock, fatSnekClock;
 	
 	int randDist;
