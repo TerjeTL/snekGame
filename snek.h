@@ -25,6 +25,7 @@ public:
 
 	int speedSnek(int ch);
 	int fatSnek(int ch);
+	bool squareSnek;
 	int randomInt(int min, int max);
 
 	int bodySize;
@@ -34,6 +35,7 @@ public:
 
 	std::vector<Point> points;
 	sf::CircleShape body;
+	sf::Clock squareSnekTimer;
 
 	Vec2f position;
 	Vec2i snekOrigin;

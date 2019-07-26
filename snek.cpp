@@ -92,6 +92,9 @@ void Snek::checkFood(std::vector<Point>& foods, Map& map)
 				case BORDER: //flashy travely boarders
 					map.papersPleaseDisabled(1);
 					break;
+				case SQUARE: //snek is playing snakes
+					squareSnek = true;
+					squareSnekTimer.restart();
 				}
 				foods.erase(foods.begin() + k);
 			}
@@ -143,7 +146,12 @@ void Snek::resetPos(const Map& map)
 
 void Snek::setRotAngle(float rad)
 {
-	rotAngle = rad*rotSpeed;
+	if (squareSnek) rotAngle = rad;
+	else 
+	{
+		rotAngle = rad * rotSpeed;
+	}
+	
 }
 
 void Snek::setRotSpeed(float speed)

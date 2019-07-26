@@ -27,8 +27,7 @@ private:
 	std::vector<Ghost> ghosts;
 	int w, h;
 	int activatorSize;
-	int colors[5][3] = { {0, 255, 0},  {255, 0, 0}, {255, 0, 255}, {0, 255, 255}, {255, 160, 60} };
-	int quit = 0;
+	int colors[6][3] = { {0, 255, 0},  {255, 0, 0}, {255, 0, 255}, {0, 255, 255}, {255, 160, 60}, {55, 255, 200} };
 	sf::RenderWindow window;
 	sf::Clock spawnClock;
 	std::vector<Point> foods;

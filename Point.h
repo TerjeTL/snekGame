@@ -7,6 +7,7 @@
 #define FAT 3
 #define THIN 4
 #define BORDER 5
+#define SQUARE 6
 
 struct Point
 
