@@ -26,6 +26,7 @@ private:
 	Snek snek;
 	std::vector<Ghost> ghosts;
 	int w, h;
+	int quit = 0;
 	int activatorSize;
 	int colors[6][3] = { {0, 255, 0},  {255, 0, 0}, {255, 0, 255}, {0, 255, 255}, {255, 160, 60}, {55, 255, 200} };
 	sf::RenderWindow window;

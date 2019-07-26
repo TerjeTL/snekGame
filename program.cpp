@@ -2,7 +2,7 @@
 
 
 Program::Program(int width, int height) : w(width), h(height), area(width, height, height - 100, 5),
-activatorSize(6), running(true), snek(area, networkHandler), networkHandler(mtx, ghosts, snek.points), window(sf::VideoMode(width, height), "Sneky boi")
+activatorSize(6), running(true), snek(area, networkHandler, mtx), networkHandler(mtx, ghosts, snek.points), window(sf::VideoMode(width, height), "Sneky boi")
 {
 	snek.body.setFillColor(sf::Color::Green);
 	//ghosts.push_back(Ghost());
