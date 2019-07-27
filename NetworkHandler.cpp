@@ -293,7 +293,7 @@ void NetworkHandler::connect(std::string ip_, int port_)
 {
 	ip = ip_;
 	port = port_;
-
+	std::cout << "Connecting..." << std::endl;
 	if (!tcpSocket.connect(ip, port, sf::seconds(20)))
 
 	{

@@ -2,7 +2,7 @@
 
 
 Program::Program(int width, int height) : w(width), h(height), area(width, height, height - 100, 5),
-activatorSize(6), running(true), snek(area, networkHandler, mtx, qtree), networkHandler(mtx, ghosts, snek.points, foods), window(sf::VideoMode(width, height), "Sneky boi"),
+activatorSize(6), running(true), snek(area, networkHandler, mtx, qtree), networkHandler(mtx, ghosts, snek.points, foods),
 spawnTimer(4)
 {
 	snek.body.setFillColor(sf::Color::Green);
@@ -32,6 +32,8 @@ int Program::mainLoop()
 	//NetworkHandler 
 	networkHandler.connect("82.47.120.89", 5000);
 	networkHandler.sendCreate();
+
+	window.create(sf::VideoMode(w, h), "Sneky boi");
 	
 	if (!window.isOpen())
 	{
