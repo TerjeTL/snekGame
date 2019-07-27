@@ -1,16 +1,17 @@
 #include "NetworkHandler.h"
 
 NetworkHandler::NetworkHandler(sf::Mutex& mtx_, std::vector<Ghost>& ghosts_, const std::vector<Point>& points_): mtx(mtx_), ghosts(ghosts_), points(points_),
-recieveThread(&NetworkHandler::receive, this)
+receiveThreadUDP(&NetworkHandler::receiveUDP, this), receiveThreadTCP(&NetworkHandler::receiveTCP, this)
 
 {
-	socket.setBlocking(false);
+	udpSocket.setBlocking(false);
 }
 
 NetworkHandler::~NetworkHandler()
 
 {
-	recieveThread.wait();
+	receiveThreadUDP.wait();
+	receiveThreadTCP.wait();
 }
 
 void NetworkHandler::sendPos(Vec2f pos, Vec2f vel, int pointsAllowed, float bodySize)
@@ -22,10 +23,7 @@ void NetworkHandler::sendPos(Vec2f pos, Vec2f vel, int pointsAllowed, float body
 		MovePacket movePacket(pos.x, pos.y, vel.x, vel.y, pointsAllowed, bodySize);
 		sf::Packet packetSend;
 		packetSend << movePacket;
-		packetMtx.lock();
-		threadPacket = packetSend;
-		packetMtx.unlock();
-		socket.send(packetSend, ip, port);
+		udpSocket.send(packetSend, ip, port);
 		posClock.restart();
 	}
 }
@@ -39,10 +37,7 @@ void NetworkHandler::sendPoint(const Point& point, const std::string& id)
 		PointPacket pointPacket(point.position.x, point.position.y, point.type, point.radius);
 		sf::Packet packetSend;
 		packetSend << pointPacket;
-		//packetMtx.lock();
-		//threadPacket = packetSend;
-		//packetMtx.unlock();
-		socket.send(packetSend, ip, port);
+		udpSocket.send(packetSend, ip, port);
 		pointClock.restart();
 	}
 }
@@ -53,10 +48,9 @@ void NetworkHandler::sendClear()
 	ClearPacket clearPacket;
 	sf::Packet packetSend;
 	packetSend << clearPacket;
-	//packetMtx.lock();
-	//threadPacket = packetSend;
-	//packetMtx.unlock();
-	socket.send(packetSend, ip, port);
+	tcpSocket.setBlocking(true);
+	tcpSocket.send(packetSend);
+	tcpSocket.setBlocking(false);
 }
 
 void NetworkHandler::sendCreate()
@@ -65,94 +59,125 @@ void NetworkHandler::sendCreate()
 	CreateGhostPacket createGhostPacket;
 	sf::Packet packetSend;
 	packetSend << createGhostPacket;
-	//packetMtx.lock();
-	//threadPacket = packetSend;
-	//packetMtx.unlock();
-	socket.send(packetSend, ip, port);
-	//socket.setBlocking(false);
-}
-
-void NetworkHandler::sendAlive()
-
-{
-	if (alive.getElapsedTime().asSeconds() > 1.0)
-
-	{
-		alive.restart();
-		AlivePacket alivePacket;
-		sf::Packet sendPacket;
-		sendPacket << alivePacket;
-		socketMtx.lock();
-		socket.send(sendPacket, ip, port);
-		socketMtx.unlock();
-	}
-}
-
-void NetworkHandler::send()
-
-{
-	while (!quit)
-
-	{
-		if (threadPacket.getDataSize() != 0)
-
-		{
-			socketMtx.lock();
-			int index = socket.send(threadPacket, ip, port);
-			//std::cout << index << std::endl;
-			socketMtx.unlock();
-			threadPacket.clear();
-		}
-	}
+	tcpSocket.send(packetSend);
 }
 
 void NetworkHandler::sendUpdateSnakes(std::string id)
 
 {
-	std::cout << "test" << std::endl;
 	sf::Packet packetSend;
 	CreateGhostPacket createGhostPacket;
 	createGhostPacket.first = 0;
 	packetSend << createGhostPacket;
-	socketMtx.lock();
-	socket.send(packetSend, ip, port);
-	socketMtx.unlock();
+	socketMtxTCP.lock();
+	tcpSocket.send(packetSend);
+	socketMtxTCP.unlock();
 	for (int i = 0; i < points.size(); i++)
 
 	{
 		packetSend.clear();
-		//sendPoint(points[i], id);
 		PointPacket pointPacket(points[i].position.x, points[i].position.y, points[i].type, points[i].radius);
 		pointPacket.id = id;
 		packetSend << pointPacket;
-		socket.send(packetSend, ip, port);
+		udpSocket.send(packetSend, ip, port);
 	}
 }
 
-void NetworkHandler::receive()
+void NetworkHandler::receiveTCP()
 
 {
 	sf::Packet packetRecieve;
-	while (!quit)
+	while(!quitTCP)
 
 	{
 		packetRecieve.clear();
-		socketMtx.lock();
-		sf::IpAddress sender;
-		unsigned short senderPort;
-		int ready = (socket.receive(packetRecieve, sender, senderPort) == sf::Socket::Done);
-		//std::cout << sender << ":" << senderPort << std::endl;
-		socketMtx.unlock();
+		//socketMtxTCP.lock();
+		sf::Socket::Status type = tcpSocket.receive(packetRecieve);
+		int ready = (type == sf::Socket::Done);
+		//socketMtxTCP.unlock();
+
+		if (type == sf::Socket::Disconnected && connected)
+
+		{
+			std::cout << "Disconnected from server!" << std::endl;
+			connected = 0;
+		}
+
 		if (ready)
 
 		{
-			
 			unsigned char msg;
 			packetRecieve >> msg;
-			//std::cout << msg << std::endl;
-			//mtx.lock();
 
-			
+			if (msg == CREA)
+
+			{
+				std::string id;
+				CreateGhostPacket packet;
+				packetRecieve >> packet;
+				packetRecieve >> id;
+				mtx.lock();
+				std::cout << "Created ghost with " << id << std::endl;
+				ghosts.push_back(Ghost(id));
+				if (packet.first) sendUpdateSnakes(id);
+				mtx.unlock();
+			}
+
+			if (msg == MCLR)
+
+			{
+				std::string id;
+				packetRecieve >> id;
+				mtx.lock();
+				int index = findGhost(id);
+				if (index != -1) ghosts[index].reset();
+				mtx.unlock();
+			}
+
+			if (msg == DSCT)
+
+			{
+				std::string id;
+				packetRecieve >> id;
+				mtx.lock();
+				if (ghosts.size() == 1)
+
+				{
+					ghosts.clear();
+				}
+
+				else
+
+				{
+					int index = findGhost(id);
+					if (index != -1) ghosts.erase(ghosts.begin() + index);
+				}
+				mtx.unlock();
+			}
+		}
+		packetRecieve.clear();
+	}
+}
+
+void NetworkHandler::receiveUDP()
+
+{
+	sf::Packet packetRecieve;
+	while(!quitUDP)
+
+	{
+		packetRecieve.clear();
+		socketMtxUDP.lock();
+		sf::IpAddress sender;
+		unsigned short senderPort;
+		int ready = (udpSocket.receive(packetRecieve, sender, senderPort) == sf::Socket::Done);
+		socketMtxUDP.unlock();
+
+		if (ready)
+
+		{
+			unsigned char msg;
+			packetRecieve >> msg;
 
 			if (msg == MOVE)
 
@@ -184,84 +209,7 @@ void NetworkHandler::receive()
 				if (index != -1 && (packet.id == myID || packet.id == "")) ghosts[index].points.push_back(Point(Vec2f(packet.x, packet.y), packet.type, packet.radius));
 				mtx.unlock();
 			}
-
-			if (msg == CREA)
-
-			{
-				std::string id;
-				CreateGhostPacket packet;
-				packetRecieve >> packet;
-				packetRecieve >> id;
-				mtx.lock();
-				std::cout << "Created ghost with " << id << std::endl;
-				ghosts.push_back(Ghost(id));
-				if (packet.first) sendUpdateSnakes(id);
-				mtx.unlock();
-			}
-
-			if (msg == MCLR)
-
-			{
-				std::string id;
-				packetRecieve >> id;
-				mtx.lock();
-				int index = findGhost(id);
-				if (index != -1) ghosts[index].reset();
-				mtx.unlock();
-			}
-
-			if (msg == MYID)
-
-			{
-				std::string id;
-				packetRecieve >> id;
-				myID = id;
-				std::cout << "My ID " << id << std::endl;
-			}
-
-			if (msg == DSCT)
-
-			{
-				std::string id;
-				packetRecieve >> id;
-				mtx.lock();
-				if (ghosts.size() == 1)
-
-				{
-					ghosts.clear();
-				}
-
-				else
-
-				{
-					int index = findGhost(id);
-					if (index != -1) ghosts.erase(ghosts.begin() + index);
-				}
-				mtx.unlock();
-			}
-
-			if (msg == ALIV)
-
-			{
-				clock.restart();
-			}
-			//mtx.unlock();
-			packetRecieve.clear();
-			//socketMtx.lock();
-			//socket.setBlocking(false);
-			//ready = (socket.receive(packetRecieve) == sf::Socket::Done);
-			//socketMtx.unlock();
 		}
-
-		if (clock.getElapsedTime().asSeconds() > 10 && connected)
-
-		{
-			std::cout << "Lost connection to server" << std::endl;
-			connected = 0;
-			//socket.disconnect();
-		}
-
-		
 	}
 }
 
@@ -282,44 +230,80 @@ int NetworkHandler::findGhost(const std::string& id)
 	return -1;
 }
 
-void NetworkHandler::connect(std::string ip_, int port_)
+void NetworkHandler::bindUDPSocket(unsigned short port)
 
 {
-	//if (!socket.connect(ip, port, sf::seconds(5)))
-
-	//{
-	ip = ip_;
-	port = port_;
-	int code = socket.bind(5000);
+	int code = udpSocket.bind(5000);
 	int i = 0;
 	while (code)
 
 	{
 		i++;
-		code = socket.bind(port + i);
+		code = udpSocket.bind(port + i);
 	}
 
-	std::cout << "Connected to " << ip << ":" << port << " on port " << port+i << std::endl;
-	//}
+	std::cout << "UDP Socket bound to " << udpSocket.getLocalPort() << std::endl;
+}
+
+void NetworkHandler::connect(std::string ip_, int port_)
+
+{
+	ip = ip_;
+	port = port_;
+
+	if (!tcpSocket.connect(ip, port, sf::seconds(20)))
+
+	{
+		std::cout << "Connected to tcp on " << ip << ":" << port << std::endl;
+	}
+
+	bindUDPSocket(port);
+
+	sf::Packet receivePacket;
+	tcpSocket.receive(receivePacket);
+	unsigned char msg;
+	receivePacket >> msg;
+
+	if (msg == MYID)
+
+	{
+		std::string id;
+		receivePacket >> id;
+		myID = id;
+		std::cout << "My ID " << id << std::endl;
+		std::cout << "Sending UDP connection packet!" << std::endl;
+		sf::Packet sendPacket;
+		UDPJoinPacket udpPacket;
+		sendPacket << udpPacket;
+		sendPacket << id;
+		udpSocket.send(sendPacket, ip, port);
+	}
+
 	sf::Packet packet;
 	packet << CreateGhostPacket();
-	socket.send(packet, ip, port);
+	tcpSocket.send(packet);
 	connected = 1;
-	clock.restart();
 
-	//recieveThread = new sf::Thread(&NetworkHandler::receive, this);
-	recieveThread.launch();
+	receiveThreadUDP.launch();
+	receiveThreadTCP.launch();
 }
 
 void NetworkHandler::quitConnection()
 
 {
-	quit = 1;
-	socketMtx.lock();
+	mtx.lock();
+	quitTCP = 1;
+	quitUDP = 1;
+	mtx.unlock();
+
+	//socketMtxTCP.lock();
+	//tcpSocket.disconnect();
+	//socketMtxTCP.unlock();
+	socketMtxTCP.lock();
 	DisconnectPacket disconnectPacket;
 	sf::Packet sendPacket;
 	sendPacket << disconnectPacket;
-	socket.send(sendPacket, ip, port);
-	//socket.disconnect();
-	socketMtx.unlock();
+	tcpSocket.send(sendPacket);
+	tcpSocket.disconnect();
+	socketMtxTCP.unlock();
 }
