@@ -1,7 +1,7 @@
 #include "snek.h"
 
 Snek::Snek(Map& map, NetworkHandler& networkHandler_, sf::Mutex& mtx_, QuadTree*& qtree_) : bodySize(3), body(3, 70), rotAngle(0.0), dist(0), snekOrigin(map.origin), position(100, 100), velocity(1, 0),
-networkHandler(networkHandler_), mtx(mtx_), squareSnek(false), qtree(qtree_), wooshSnek(false), revSnek(false), mitosis(false)
+networkHandler(networkHandler_), mtx(mtx_), squareSnek(false), qtree(qtree_), wooshSnek(false), revSnek(false), mitosis(false), noHoles(false)
 {
 	resetPos(map);
 	snekRekt, allowedToMakePoint = false, true;
@@ -51,6 +51,7 @@ void Snek::posUpdate()
 void Snek::snekBodyUpdate()
 {
 	if (wooshTimer.getElapsedTime().asSeconds() > 10) wooshSnek = false;
+	if (noHolesClock.getElapsedTime().asSeconds() > 10) noHoles = false;
 
 	if (spacer.getElapsedTime().asSeconds() > randSpacer) //All that random numbers jazz
 	{
@@ -62,7 +63,7 @@ void Snek::snekBodyUpdate()
 
 	}
 
-	if (dist < randDist || wooshSnek) // if/else -> points push-back.
+	if ((dist < randDist || wooshSnek) && !noHoles) // if/else -> points push-back.
 	{
 		spacer.restart();
 		pointsAllowed = 0;
@@ -101,24 +102,34 @@ void Snek::checkFood(Point point, Map& map, std::vector<Point>& foods)
 		case THIN: //skinny snek
 			fatSnek(-1);
 			break;
+
 		case BORDER: //flashy travely boarders
 			map.papersPleaseDisabled(1);
 			break;
+
 		case SQUARE: //snek is playing snakes
 			squareSnek = true;
 			squareSnekTimer.restart();
 			break;
+
 		case WOOSH:
 			wooshSnek = true;
 			wooshTimer.restart();
 			break;
+
 		case REVSNEK:
 			revSnek = true;
 			revSnekTimer.restart();
 			break;
+
 		case MITOSIS:
 			mitosis = true;
 			mitosisClock.restart();
+			break;
+
+		case NOHOLES:
+			noHoles = true;
+			noHolesClock.restart();
 			break;
 	}
 	foods.erase(foods.begin() + point.id);

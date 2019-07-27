@@ -11,6 +11,7 @@
 #define WOOSH 7
 #define REVSNEK 8
 #define MITOSIS 9
+#define NOHOLES 10
 
 struct Point
 
