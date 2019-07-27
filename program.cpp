@@ -99,9 +99,9 @@ void Program::update()
 	if (qtree != nullptr) delete qtree;
 	qtree = new QuadTree(Boundary(w, h, w / 2, h / 2), 10);
 	int loop = 0;
-	if (snek.points.size() > 7) loop = 1;
+	if (snek.points.size() > 10) loop = 1;
 
-	for (int i = 0; i < snek.points.size() - 7 && loop; i++)
+	for (int i = 0; i < snek.points.size() - 10 && loop; i++)
 
 	{
 		qtree->insert(Point(snek.points[i].position, snek.points[i].type, snek.points[i].radius));

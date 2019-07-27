@@ -29,7 +29,7 @@ private:
 	//sf::TcpSocket socket;
 	sf::Packet threadPacket;
 	std::string myID;
-	sf::Thread* recieveThread = 0;
+	sf::Thread recieveThread;
 	sf::Mutex& mtx;
 	sf::Mutex packetMtx;
 	sf::Mutex socketMtx;
