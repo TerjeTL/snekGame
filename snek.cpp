@@ -63,7 +63,7 @@ void Snek::snekBodyUpdate()
 
 	}
 
-	if ((dist < randDist || wooshSnek) && !noHoles) // if/else -> points push-back.
+	if (((dist < randDist) && !noHoles) || wooshSnek) // if/else -> points push-back.
 	{
 		spacer.restart();
 		pointsAllowed = 0;
