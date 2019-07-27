@@ -1,6 +1,7 @@
 #include "NetworkHandler.h"
 
-NetworkHandler::NetworkHandler(sf::Mutex& mtx_, std::vector<Ghost>& ghosts_, const std::vector<Point>& points_): mtx(mtx_), ghosts(ghosts_), points(points_)
+NetworkHandler::NetworkHandler(sf::Mutex& mtx_, std::vector<Ghost>& ghosts_, const std::vector<Point>& points_): mtx(mtx_), ghosts(ghosts_), points(points_),
+recieveThread(&NetworkHandler::receive, this)
 
 {
 	socket.setBlocking(false);
@@ -9,12 +10,7 @@ NetworkHandler::NetworkHandler(sf::Mutex& mtx_, std::vector<Ghost>& ghosts_, con
 NetworkHandler::~NetworkHandler()
 
 {
-	if (recieveThread)
-
-	{
-		recieveThread->wait();
-		if (recieveThread != nullptr) delete recieveThread;
-	}
+	recieveThread.wait();
 }
 
 void NetworkHandler::sendPos(Vec2f pos, Vec2f vel, int pointsAllowed, float bodySize)
@@ -311,8 +307,8 @@ void NetworkHandler::connect(std::string ip_, int port_)
 	connected = 1;
 	clock.restart();
 
-	recieveThread = new sf::Thread(&NetworkHandler::receive, this);
-	recieveThread->launch();
+	//recieveThread = new sf::Thread(&NetworkHandler::receive, this);
+	recieveThread.launch();
 }
 
 void NetworkHandler::quitConnection()
