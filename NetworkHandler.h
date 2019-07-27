@@ -12,33 +12,34 @@ class NetworkHandler
 public:
 	NetworkHandler(sf::Mutex& mtx_, std::vector<Ghost>& ghosts_, const std::vector<Point>& points_);
 	~NetworkHandler();
-	void receive();
-	void send();
+	void receiveUDP();
+	void receiveTCP();
 	void sendPos(Vec2f pos, Vec2f vel, int pointsAllowed, float bodySize);
 	void sendPoint(const Point& point, const std::string& id = "");
 	void sendClear();
 	void sendCreate();
-	void sendAlive();
 	void sendUpdateSnakes(std::string id);
 	void connect(std::string ip, int port);
 	void quitConnection();
+	void bindUDPSocket(unsigned short port);
 	int findGhost(const std::string& id);
 
 private:
-	sf::UdpSocket socket;
-	//sf::TcpSocket socket;
+	sf::UdpSocket udpSocket;
+	sf::TcpSocket tcpSocket;
 	sf::Packet threadPacket;
 	std::string myID;
-	sf::Thread recieveThread;
+	sf::Thread receiveThreadUDP;
+	sf::Thread receiveThreadTCP;
 	sf::Mutex& mtx;
 	sf::Mutex packetMtx;
-	sf::Mutex socketMtx;
+	sf::Mutex socketMtxUDP;
+	sf::Mutex socketMtxTCP;
 	std::vector<Ghost>& ghosts;
 	const std::vector<Point>& points;
-	sf::Clock clock;
-	sf::Clock alive;
 	int connected = 0;
-	int quit = 0;
+	int quitTCP = 0;
+	int quitUDP = 0;
 
 	sf::Clock posClock;
 	float posRate = 1.0 / 60.0;

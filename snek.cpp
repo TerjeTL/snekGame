@@ -34,7 +34,7 @@ void Snek::update(std::vector<Ghost>& ghosts, Map& map, std::vector<Point>& food
 
 
 	if (snekRekt) {
-		std::cout << "snek ded" << std::endl;
+		std::cout << "Snek is dead!" << std::endl;
 	}
 }
 
@@ -88,7 +88,7 @@ void Snek::checkFood(Point point, Map& map, std::vector<Point>& foods)
 	{
 		case FAST:
 			speedSnek(1);
-			std::cout << "speed" << std::endl;
+			//std::cout << "speed" << std::endl;
 			break;
 
 		case SLOW:

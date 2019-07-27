@@ -59,3 +59,9 @@ sf::Packet& operator <<(sf::Packet& packet, const AlivePacket& alive)
 {
 	return packet << alive.name;
 }
+
+sf::Packet& operator <<(sf::Packet& packet, const UDPJoinPacket& udpj)
+
+{
+	return packet << udpj.name;
+}
