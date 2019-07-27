@@ -9,6 +9,7 @@
 #define ALIV 6
 #define UDPJ 7
 #define DEAD 8
+#define EATP 9
 
 struct MovePacket
 
@@ -151,6 +152,24 @@ struct DeadPacket
 	unsigned char name = DEAD;
 };
 
+struct EatPacket
+
+{
+	EatPacket()
+
+	{
+
+	}
+
+	EatPacket(int index_): index(index_)
+
+	{
+
+	}
+	int index;
+	unsigned char name = EATP;
+};
+
 sf::Packet& operator <<(sf::Packet& packet, const MovePacket& move);
 sf::Packet& operator >>(sf::Packet& packet, MovePacket& move);
 sf::Packet& operator <<(sf::Packet& packet, const PointPacket& point);
@@ -164,3 +183,5 @@ sf::Packet& operator <<(sf::Packet& packet, const DisconnectPacket& disconnect);
 sf::Packet& operator <<(sf::Packet& packet, const AlivePacket& alive);
 sf::Packet& operator <<(sf::Packet& packet, const UDPJoinPacket& udpj);
 sf::Packet& operator <<(sf::Packet& packet, const DeadPacket& dead);
+sf::Packet& operator <<(sf::Packet& packet, const EatPacket& eat);
+sf::Packet& operator >>(sf::Packet& packet, EatPacket& eat);

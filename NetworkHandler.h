@@ -18,6 +18,7 @@ public:
 	void sendPoint(const Point& point, const std::string& id = "");
 	void sendClear();
 	void sendCreate();
+	void sendEat(int index);
 	void sendUpdateSnakes(std::string id);
 	void connect(std::string ip, int port);
 	void quitConnection();

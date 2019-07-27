@@ -140,6 +140,7 @@ void Snek::checkFood(Point point, Map& map, std::vector<Point>& foods)
 			break;
 	}
 	foods.erase(foods.begin() + point.id);
+	networkHandler.sendEat(point.serverID);
 
 	for (int i = 0; i < foods.size(); i++)
 

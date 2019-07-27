@@ -83,11 +83,12 @@ void Program::spawnFood(Snek snek) // i have no idea if this mitosis stuff will 
 	if (spawnClock.getElapsedTime().asSeconds() > spawnTimerCopy)
 	{
 		Vec2f position;
+		std::cout << "area origin x " << area.origin.x << " area size" << area.size << " area origin y" << area.origin.y << std::endl;
 		position.x = randomInt(area.origin.x, area.origin.x + area.size);
 		position.y = randomInt(area.origin.y, area.origin.y + area.size);
 		int type = randomInt(1, 10);
 		int id = foods.size();
-		foods.push_back(Point(position, type, activatorSize, id));
+		foods.push_back(Point(position, type, activatorSize, id, id));
 		spawnClock.restart();
 	}
 }
@@ -118,7 +119,7 @@ void Program::update()
 	for (int i = 0; i < foods.size(); i++)
 
 	{
-		qtree->insert(Point(foods[i].position, foods[i].type, foods[i].radius, foods[i].id));
+		qtree->insert(Point(foods[i].position, foods[i].type, foods[i].radius, foods[i].id, foods[i].serverID));
 	}
 
 	if (snek.snekRekt)
@@ -134,7 +135,7 @@ void Program::update()
 		ghosts[i].update();
 	}
 	
-	spawnFood(snek);
+	//spawnFood(snek);
 }
 
 void Program::draw()
@@ -179,7 +180,7 @@ void Program::reset()
 		snek.resetPos(area);
 		snek.snekRekt = false;
 		running = true;
-		foods.clear();
+		//foods.clear();
 		networkHandler.sendClear();
 	}
 }

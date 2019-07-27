@@ -28,7 +28,7 @@ struct Point
 
 	}
 
-	Point(Vec2f position_, int type_, float radius_, int id_) : position(position_), type(type_), radius(radius_), id(id_)
+	Point(Vec2f position_, int type_, float radius_, int id_, int serverID_) : position(position_), type(type_), radius(radius_), id(id_), serverID(serverID_)
 
 	{
 
@@ -38,4 +38,5 @@ struct Point
 	int type;
 	float radius;
 	int id = -1;
+	int serverID = -1;
 };

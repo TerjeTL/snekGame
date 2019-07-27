@@ -62,6 +62,15 @@ void NetworkHandler::sendCreate()
 	tcpSocket.send(packetSend);
 }
 
+void NetworkHandler::sendEat(int index)
+
+{
+	EatPacket eatPacket(index);
+	sf::Packet packetSend;
+	packetSend << eatPacket;
+	tcpSocket.send(packetSend);
+}
+
 void NetworkHandler::sendUpdateSnakes(std::string id)
 
 {
@@ -131,6 +140,32 @@ void NetworkHandler::receiveTCP()
 				mtx.lock();
 				int index = findGhost(id);
 				if (index != -1) ghosts[index].reset();
+				mtx.unlock();
+			}
+
+			if (msg == NPNT)
+
+			{
+				PointPacket packet;
+				packetRecieve >> packet;
+				std::string id;
+				packetRecieve >> id;
+
+				mtx.lock();
+				if (packet.type == -1)
+
+				{
+					foods.clear();
+				}
+
+				else
+
+				{
+					foods.push_back(Point(Vec2f(packet.x, packet.y), packet.type, packet.radius));
+					int index = foods.size() - 1;
+					foods[index].id = index;
+					foods[index].serverID = index;
+				}
 				mtx.unlock();
 			}
 

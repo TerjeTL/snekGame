@@ -77,3 +77,15 @@ sf::Packet& operator <<(sf::Packet& packet, const DeadPacket& dead)
 {
 	return packet << dead.name;
 }
+
+sf::Packet& operator <<(sf::Packet& packet, const EatPacket& eat)
+
+{
+	return packet << eat.name << eat.index;
+}
+
+sf::Packet& operator >>(sf::Packet& packet, EatPacket& eat)
+
+{
+	return packet >> eat.index;
+}

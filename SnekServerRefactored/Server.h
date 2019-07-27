@@ -16,6 +16,8 @@ public:
 	void generateID(std::string& s);
 	void createID(std::string& s);
 	void createFood();
+	void updateFood();
+	void chooseColor(std::vector<int>& color);
 	int getUDPClient(const sf::IpAddress& ip, const unsigned short& port);
 	int checkID(std::string& s);
 	int randomInt(int min, int max);
@@ -30,7 +32,7 @@ private:
 	sf::UdpSocket udpSocket;
 	unsigned int quit = 0;
 
-
+	std::vector<int> usedColors;
 	std::vector<Point> foods;
 	std::vector<std::vector<int>> colors = 
 	{ {0, 255, 0},  {255, 0, 0}, {255, 0, 255}, {0, 255, 255}, 

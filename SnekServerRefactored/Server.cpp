@@ -40,7 +40,8 @@ int Server::mainLoop()
 					std::cout << clients.size() << " clients connected" << std::endl;
 
 					sf::Packet sendPacket;
-					std::vector<int> color = colors[randomInt(0, colors.size() - 1)];
+					std::vector<int> color;
+					chooseColor(color);
 					myIDPacket myID(color[0], color[1], color[2]);
 					sendPacket << myID << id;
 					clients[last].socket->send(sendPacket);
@@ -68,7 +69,6 @@ int Server::mainLoop()
 					copy >> msg;
 					int connected = getUDPClient(ip, port);
 					
-
 					if (msg == UDPJ && connected == -1)
 
 					{
@@ -121,9 +121,8 @@ int Server::mainLoop()
 
 					{
 						sf::Packet recievePacket;
-						sf::Packet copy = recievePacket;
-						unsigned char msg;
-						copy >> msg;
+						
+						
 
 						if (clients[i].socket->receive(recievePacket) == sf::Socket::Disconnected)
 
@@ -142,8 +141,25 @@ int Server::mainLoop()
 						else
 
 						{
-							recievePacket << clients[i].id;
-							broadcastTCP(recievePacket, i);
+							unsigned char msg;
+							sf::Packet copy = recievePacket;
+							copy >> msg;
+							if (msg == EATP)
+
+							{
+								EatPacket eatPacket;
+								copy >> eatPacket;
+								std::cout << "Food " << eatPacket.index << " eaten" << std::endl;
+								if (eatPacket.index < foods.size()) foods.erase(foods.begin() + eatPacket.index);
+								updateFood();
+							}
+
+							else
+
+							{
+								recievePacket << clients[i].id;
+								broadcastTCP(recievePacket, i);
+							}
 						}
 					}
 				}
@@ -157,6 +173,7 @@ int Server::mainLoop()
 				sendPacket << alivePacket;
 				broadcastTCP(sendPacket);
 				ping.restart();
+				createFood();
 			}
 		}
 	}
@@ -250,11 +267,59 @@ void Server::generateID(std::string& s)
 void Server::createFood()
 
 {
-	if (foodClock.getElapsedTime().asSeconds() > 10.0)
+	if (foodClock.getElapsedTime().asSeconds() > 10.0 && clients.size() > 0)
 
 	{
-		
+		int positionX = randomInt(50, 850);
+		int positionY = randomInt(50, 850);
+		foods.push_back(Point(Vec2f(positionX, positionY), randomInt(1, 10), 6));
+		foodClock.restart();
+		updateFood();
 	}
+}
+
+void Server::updateFood()
+
+{
+	sf::Packet packet;
+	PointPacket pointPacket(0, 0, -1, 1);
+	packet << pointPacket;
+	broadcastTCP(packet);
+
+	for (int i = 0; i < foods.size(); i++)
+
+	{
+		pointPacket = PointPacket(foods[i].position.x, foods[i].position.y, foods[i].type, foods[i].radius);
+		packet.clear();
+		packet << pointPacket;
+		broadcastTCP(packet);
+	}
+}
+
+void Server::chooseColor(std::vector<int>& color)
+
+{
+	int index = randomInt(0, colors.size() - 1);
+	int used = 1;
+	while (used)
+
+	{
+		int val = 0;
+		for (int i = 0; i < usedColors.size() && usedColors.size() < colors.size(); i++)
+
+		{
+			if (index == usedColors[i])
+
+			{
+				val = 1;
+			}
+		}
+
+		if (val) used = 1, index = randomInt(0, colors.size() - 1);
+		else used = 0;
+	}
+	
+	color = colors[index];
 }
 
 int Server::randomInt(int min, int max)
