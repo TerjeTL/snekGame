@@ -161,6 +161,8 @@ void Program::draw()
 	{
 		sf::Color color(colors[foods[i].type - 1][0], colors[foods[i].type - 1][1], colors[foods[i].type - 1][2]);
 		food.setFillColor(color);
+		food.setOutlineThickness(0.8);
+		food.setOutlineColor({ 255, 255, 255 });
 		food.setPosition(foods[i].position.x, foods[i].position.y);
 		window.draw(food);
 	}

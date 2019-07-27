@@ -26,7 +26,7 @@ void Snek::update(std::vector<Ghost>& ghosts, Map& map, std::vector<Point>& food
 
 	if (!wooshSnek) snekRektOmeter(ghosts, foods, map);
 
-	int ch = speedSnek(0);
+	int ch = speedSnek(0); // ch stands for choise
 	if (ch != 0) speedSnek(ch);
 
 	int ch2 = fatSnek(0);
