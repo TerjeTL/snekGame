@@ -245,3 +245,9 @@ void Server::generateID(std::string& s)
 		exists = checkID(s);
 	}
 }
+
+int Server::randomInt(int min, int max)
+
+{
+	return rand() % (max - min + 1) + min;
+}

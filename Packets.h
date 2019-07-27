@@ -8,6 +8,7 @@
 #define DSCT 5
 #define ALIV 6
 #define UDPJ 7
+#define DEAD 8
 
 struct MovePacket
 
@@ -62,6 +63,7 @@ struct CreateGhostPacket
 
 	unsigned char name = CREA;
 	int first = 1;
+	unsigned char r, g, b;
 };
 
 struct ClearPacket
@@ -86,6 +88,7 @@ struct myIDPacket
 	}
 
 	unsigned char name = MYID;
+	unsigned char r, g, b;
 };
 
 struct DisconnectPacket
@@ -124,6 +127,18 @@ struct UDPJoinPacket
 	unsigned char name = UDPJ;
 };
 
+struct DeadPacket
+
+{
+	DeadPacket()
+
+	{
+
+	}
+
+	unsigned char name = DEAD;
+};
+
 sf::Packet& operator <<(sf::Packet& packet, const MovePacket& move);
 sf::Packet& operator >>(sf::Packet& packet, MovePacket& move);
 sf::Packet& operator <<(sf::Packet& packet, const PointPacket& point);
@@ -135,3 +150,4 @@ sf::Packet& operator <<(sf::Packet& packet, const myIDPacket& idpacket);
 sf::Packet& operator <<(sf::Packet& packet, const DisconnectPacket& disconnect);
 sf::Packet& operator <<(sf::Packet& packet, const AlivePacket& alive);
 sf::Packet& operator <<(sf::Packet& packet, const UDPJoinPacket& udpj);
+sf::Packet& operator <<(sf::Packet& packet, const DeadPacket& dead);

@@ -92,7 +92,6 @@ void Program::spawnFood(Snek snek) // i have no idea if this mitosis stuff will 
 	}
 }
 
-
 void Program::update()
 {
 	if (qtree != nullptr) delete qtree;
