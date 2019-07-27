@@ -56,7 +56,7 @@ void NetworkHandler::sendClear()
 void NetworkHandler::sendCreate()
 
 {
-	CreateGhostPacket createGhostPacket;
+	CreateGhostPacket createGhostPacket(color.r, color.g, color.b);
 	sf::Packet packetSend;
 	packetSend << createGhostPacket;
 	tcpSocket.send(packetSend);
@@ -66,7 +66,7 @@ void NetworkHandler::sendUpdateSnakes(std::string id)
 
 {
 	sf::Packet packetSend;
-	CreateGhostPacket createGhostPacket;
+	CreateGhostPacket createGhostPacket(color.r, color.g, color.b);
 	createGhostPacket.first = 0;
 	packetSend << createGhostPacket;
 	socketMtxTCP.lock();
