@@ -24,6 +24,7 @@ public:
 	void resetPos(const Map& map);
 	void snekRektOmeter(std::vector<Ghost>& ghosts, std::vector<Point>& foods, Map& map);
 	void edges(Map& map);
+	void setColor();
 	float randNumber(float max, float min);
 
 	int speedSnek(int ch);
@@ -47,7 +48,7 @@ private:
 	
 	sf::Mutex& mtx;
 	sf::Clock spacer, speedSnekClock, fatSnekClock, updateClock, sendPosClock, sendPointClock;
-
+	sf::Color color;
 	int randDist, pointsAllowed;
 	bool allowedToMakePoint;
 	float rotAngle;

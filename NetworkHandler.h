@@ -10,7 +10,7 @@ class NetworkHandler
 
 {
 public:
-	NetworkHandler(sf::Mutex& mtx_, std::vector<Ghost>& ghosts_, const std::vector<Point>& points_);
+	NetworkHandler(sf::Mutex& mtx_, std::vector<Ghost>& ghosts_, const std::vector<Point>& points_, std::vector<Point>& foods_);
 	~NetworkHandler();
 	void receiveUDP();
 	void receiveTCP();
@@ -23,6 +23,7 @@ public:
 	void quitConnection();
 	void bindUDPSocket(unsigned short port);
 	int findGhost(const std::string& id);
+	sf::Color color;
 
 private:
 	sf::UdpSocket udpSocket;
@@ -36,6 +37,7 @@ private:
 	sf::Mutex socketMtxUDP;
 	sf::Mutex socketMtxTCP;
 	std::vector<Ghost>& ghosts;
+	std::vector<Point>& foods;
 	const std::vector<Point>& points;
 	int connected = 0;
 	int quitTCP = 0;
@@ -45,6 +47,8 @@ private:
 	float posRate = 1.0 / 60.0;
 	sf::Clock pointClock;
 	float pointRate = 1.0 / 40.0;
+
+	
 
 	sf::IpAddress ip = "127.0.0.1";
 	int port = 5000;

@@ -1,9 +1,11 @@
 #include "Ghost.h"
 
-Ghost::Ghost(std::string id_): id(id_), velocity(0, 1)
+Ghost::Ghost(std::string id_, unsigned char r, unsigned char g, unsigned char b): id(id_), velocity(0, 1)
 
 {
-
+	color.r = r;
+	color.g = g;
+	color.b = b;
 }
 
 void Ghost::reset()
@@ -30,7 +32,7 @@ void Ghost::draw(sf::RenderWindow& window)
 
 {
 	sf::CircleShape circle;
-	
+	circle.setFillColor(color);
 
 	for (int i = 0; i < points.size(); i++)
 

@@ -61,6 +61,12 @@ struct CreateGhostPacket
 
 	}
 
+	CreateGhostPacket(unsigned char r_, unsigned char g_, unsigned char b_) : r(r_), g(g_), b(b_)
+
+	{
+
+	}
+
 	unsigned char name = CREA;
 	int first = 1;
 	unsigned char r, g, b;
@@ -82,6 +88,12 @@ struct myIDPacket
 
 {
 	myIDPacket()
+
+	{
+
+	}
+
+	myIDPacket(unsigned char r_, unsigned char g_, unsigned char b_): r(r_), g(g_), b(b_)
 
 	{
 
@@ -147,6 +159,7 @@ sf::Packet& operator <<(sf::Packet& packet, const CreateGhostPacket& create);
 sf::Packet& operator >>(sf::Packet& packet, CreateGhostPacket& create);
 sf::Packet& operator <<(sf::Packet& packet, const ClearPacket& clear);
 sf::Packet& operator <<(sf::Packet& packet, const myIDPacket& idpacket);
+sf::Packet& operator >>(sf::Packet& packet, myIDPacket& idpacket);
 sf::Packet& operator <<(sf::Packet& packet, const DisconnectPacket& disconnect);
 sf::Packet& operator <<(sf::Packet& packet, const AlivePacket& alive);
 sf::Packet& operator <<(sf::Packet& packet, const UDPJoinPacket& udpj);

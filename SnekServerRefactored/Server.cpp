@@ -40,7 +40,8 @@ int Server::mainLoop()
 					std::cout << clients.size() << " clients connected" << std::endl;
 
 					sf::Packet sendPacket;
-					myIDPacket myID;
+					std::vector<int> color = colors[randomInt(0, colors.size() - 1)];
+					myIDPacket myID(color[0], color[1], color[2]);
 					sendPacket << myID << id;
 					clients[last].socket->send(sendPacket);
 				}
@@ -243,6 +244,16 @@ void Server::generateID(std::string& s)
 	{
 		createID(s);
 		exists = checkID(s);
+	}
+}
+
+void Server::createFood()
+
+{
+	if (foodClock.getElapsedTime().asSeconds() > 10.0)
+
+	{
+		
 	}
 }
 

@@ -8,7 +8,7 @@ class Ghost
 
 {
 public:
-	Ghost(std::string id_);
+	Ghost(std::string id_, unsigned char r, unsigned char g, unsigned char b);
 	Vec2f position;
 	Vec2f serverPosition;
 	Vec2f velocity;
@@ -20,6 +20,7 @@ public:
 	void draw(sf::RenderWindow& window);
 	void update();
 	void correctPos();
+	sf::Color color = sf::Color(255, 255, 255);
 
 private:
 };

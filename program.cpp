@@ -2,7 +2,7 @@
 
 
 Program::Program(int width, int height) : w(width), h(height), area(width, height, height - 100, 5),
-activatorSize(6), running(true), snek(area, networkHandler, mtx, qtree), networkHandler(mtx, ghosts, snek.points), window(sf::VideoMode(width, height), "Sneky boi"),
+activatorSize(6), running(true), snek(area, networkHandler, mtx, qtree), networkHandler(mtx, ghosts, snek.points, foods), window(sf::VideoMode(width, height), "Sneky boi"),
 spawnTimer(4)
 {
 	snek.body.setFillColor(sf::Color::Green);

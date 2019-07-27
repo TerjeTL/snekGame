@@ -1,7 +1,7 @@
 #include "NetworkHandler.h"
 
-NetworkHandler::NetworkHandler(sf::Mutex& mtx_, std::vector<Ghost>& ghosts_, const std::vector<Point>& points_): mtx(mtx_), ghosts(ghosts_), points(points_),
-receiveThreadUDP(&NetworkHandler::receiveUDP, this), receiveThreadTCP(&NetworkHandler::receiveTCP, this)
+NetworkHandler::NetworkHandler(sf::Mutex& mtx_, std::vector<Ghost>& ghosts_, const std::vector<Point>& points_, std::vector<Point>& foods_): mtx(mtx_), ghosts(ghosts_), points(points_),
+receiveThreadUDP(&NetworkHandler::receiveUDP, this), receiveThreadTCP(&NetworkHandler::receiveTCP, this), foods(foods_)
 
 {
 	udpSocket.setBlocking(false);
@@ -118,7 +118,7 @@ void NetworkHandler::receiveTCP()
 				packetRecieve >> id;
 				mtx.lock();
 				std::cout << "Created ghost with " << id << std::endl;
-				ghosts.push_back(Ghost(id));
+				ghosts.push_back(Ghost(id, packet.r, packet.g, packet.b));
 				if (packet.first) sendUpdateSnakes(id);
 				mtx.unlock();
 			}
@@ -206,7 +206,15 @@ void NetworkHandler::receiveUDP()
 				packetRecieve >> id;
 				mtx.lock();
 				int index = findGhost(id);
-				if (index != -1 && (packet.id == myID || packet.id == "")) ghosts[index].points.push_back(Point(Vec2f(packet.x, packet.y), packet.type, packet.radius));
+				if (index != -1 && (packet.id == myID || packet.id == ""))
+
+				{
+					if (packet.type == SNAKE)
+
+					{
+						ghosts[index].points.push_back(Point(Vec2f(packet.x, packet.y), packet.type, packet.radius));
+					}
+				}
 				mtx.unlock();
 			}
 		}
@@ -267,6 +275,10 @@ void NetworkHandler::connect(std::string ip_, int port_)
 	if (msg == MYID)
 
 	{
+		
+		myIDPacket packet;
+		receivePacket >> packet;
+		color = sf::Color(packet.r, packet.g, packet.b);
 		std::string id;
 		receivePacket >> id;
 		myID = id;
@@ -280,7 +292,7 @@ void NetworkHandler::connect(std::string ip_, int port_)
 	}
 
 	sf::Packet packet;
-	packet << CreateGhostPacket();
+	packet << CreateGhostPacket(color.r, color.g, color.b);
 	tcpSocket.send(packet);
 	connected = 1;
 

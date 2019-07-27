@@ -13,6 +13,13 @@ networkHandler(networkHandler_), mtx(mtx_), squareSnek(false), qtree(qtree_), wo
 	speed = 2.0f;
 }
 
+void Snek::setColor()
+
+{
+	color = networkHandler.color;
+	body.setFillColor(color);
+}
+
 void Snek::update(std::vector<Ghost>& ghosts, Map& map, std::vector<Point>& foods)
 {
 	posUpdate();
@@ -162,7 +169,7 @@ void Snek::edges(Map& map)
 
 void Snek::draw(sf::RenderWindow& window)
 {
-
+	setColor();
 	for (int i = 0; i < points.size(); i++)
 	{
 		body.setRadius(points[i].radius);
