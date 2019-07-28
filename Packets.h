@@ -10,6 +10,9 @@
 #define UDPJ 7
 #define DEAD 8
 #define EATP 9
+#define RDYP 10
+#define RESP 11
+#define STAR 12
 
 struct MovePacket
 
@@ -62,7 +65,7 @@ struct CreateGhostPacket
 
 	}
 
-	CreateGhostPacket(unsigned char r_, unsigned char g_, unsigned char b_) : r(r_), g(g_), b(b_)
+	CreateGhostPacket(unsigned char r_, unsigned char g_, unsigned char b_, std::string ghostName_) : r(r_), g(g_), b(b_), ghostName(ghostName_)
 
 	{
 
@@ -70,6 +73,7 @@ struct CreateGhostPacket
 
 	unsigned char name = CREA;
 	int first = 1;
+	std::string ghostName = "unamed";
 	unsigned char r, g, b;
 };
 
@@ -170,6 +174,42 @@ struct EatPacket
 	unsigned char name = EATP;
 };
 
+struct ReadyPacket
+
+{
+	ReadyPacket()
+
+	{
+
+	}
+
+	unsigned char name = RDYP;
+};
+
+struct ResetPacket
+
+{
+	ResetPacket()
+
+	{
+
+	}
+
+	unsigned char name = RESP;
+};
+
+struct StartPacket
+
+{
+	StartPacket()
+
+	{
+
+	}
+
+	unsigned char name = STAR;
+};
+
 sf::Packet& operator <<(sf::Packet& packet, const MovePacket& move);
 sf::Packet& operator >>(sf::Packet& packet, MovePacket& move);
 sf::Packet& operator <<(sf::Packet& packet, const PointPacket& point);
@@ -185,3 +225,6 @@ sf::Packet& operator <<(sf::Packet& packet, const UDPJoinPacket& udpj);
 sf::Packet& operator <<(sf::Packet& packet, const DeadPacket& dead);
 sf::Packet& operator <<(sf::Packet& packet, const EatPacket& eat);
 sf::Packet& operator >>(sf::Packet& packet, EatPacket& eat);
+sf::Packet& operator <<(sf::Packet& packet, const ReadyPacket& rdy);
+sf::Packet& operator <<(sf::Packet& packet, const ResetPacket& rst);
+sf::Packet& operator <<(sf::Packet& packet, const StartPacket& start);

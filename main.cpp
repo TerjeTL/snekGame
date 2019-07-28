@@ -5,6 +5,6 @@ int main()
 {
 	
 	srand(clock());
-	Program p(900, 900);
+	Program p(700, 700);
 	return p.mainLoop();
 }

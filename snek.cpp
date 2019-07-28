@@ -1,7 +1,7 @@
 #include "snek.h"
 
-Snek::Snek(Map& map, NetworkHandler& networkHandler_, sf::Mutex& mtx_, QuadTree*& qtree_) : bodySize(3), body(3, 70), rotAngle(0.0), dist(0), snekOrigin(map.origin), position(100, 100), velocity(1, 0),
-networkHandler(networkHandler_), mtx(mtx_), squareSnek(false), qtree(qtree_), wooshSnek(false), revSnek(false), mitosis(false), noHoles(false)
+Snek::Snek(Map& map, sf::Mutex& mtx_, QuadTree*& qtree_, Program*& program_) : bodySize(3), body(3, 70), rotAngle(0.0), dist(0), snekOrigin(map.origin), position(100, 100), velocity(1, 0),
+mtx(mtx_), squareSnek(false), qtree(qtree_), wooshSnek(false), revSnek(false), mitosis(false), noHoles(false), program(program_), generator(clock())
 {
 	resetPos(map);
 	snekRekt, allowedToMakePoint = false, true;
@@ -17,22 +17,22 @@ networkHandler(networkHandler_), mtx(mtx_), squareSnek(false), qtree(qtree_), wo
 void Snek::setColor()
 
 {
-	color = networkHandler.color;
+	color = program->networkHandler->color;
 	body.setFillColor(color);
 }
 
 void Snek::update(std::vector<Ghost>& ghosts, Map& map, std::vector<Point>& foods)
 {
 	posUpdate();
-
+	
 	snekBodyUpdate(); //who tf knows how any of this works. see especially below
 
-	networkHandler.sendPos(position, velocity, pointsAllowed, bodySize);
+	program->networkHandler->sendPos(position, velocity, pointsAllowed, bodySize);
 
 	//checkFood(foods, map);
 	edges(map);
 
-	if (!wooshSnek) snekRektOmeter(ghosts, foods, map);
+	if (!wooshSnek && alive.getElapsedTime().asSeconds() > 5) snekRektOmeter(ghosts, foods, map);
 
 	int ch = speedSnek(0); // ch stands for choise
 	if (ch != 0) speedSnek(ch);
@@ -153,7 +153,7 @@ void Snek::checkFood(Point point, Map& map, std::vector<Point>& foods)
 			break;
 	}
 	foods.erase(foods.begin() + point.id);
-	networkHandler.sendEat(point.serverID);
+	program->networkHandler->sendEat(point.serverID);
 
 	for (int i = 0; i < foods.size(); i++)
 
@@ -181,8 +181,9 @@ void Snek::edges(Map& map)
 	}
 }
 
-void Snek::draw(sf::RenderWindow& window)
+void Snek::draw(sf::RenderWindow& window, Map& map)
 {
+	map.snakeColor = color;
 	setColor();
 	drawPoints.clear();
 	
@@ -259,10 +260,15 @@ void Snek::draw(sf::RenderWindow& window)
 
 void Snek::resetPos(const Map& map)
 {
-	position.x = randomInt(snekOrigin.x+50, (snekOrigin.x + map.size)-50);
-	position.y = randomInt(snekOrigin.y+50, (snekOrigin.y + map.size)-50);
+	//position.x = randomInt(snekOrigin.x+50, (snekOrigin.x + map.size)-50);
+	//position.y = randomInt(snekOrigin.y+50, (snekOrigin.y + map.size)-50);
+	std::uniform_int_distribution<int> distribution(snekOrigin.x + 50, (snekOrigin.x + map.size) - 50);
+	
+	position = Vec2f(distribution(generator), distribution(generator));
+
 	float angle = (float)randomInt(0, 359);
-	velocity.rotateInPlaze(PI*angle / 180.0);
+	Vec2f centre(map.w / 2, map.h / 2);
+	velocity = centre - position;
 }
 
 void Snek::setRotAngle(float rad) // what is this shit

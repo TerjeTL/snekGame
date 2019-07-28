@@ -121,6 +121,7 @@
   <ItemGroup>
     <ClInclude Include="..\Packets.h" />
     <ClInclude Include="Client.h" />
+    <ClInclude Include="DroppedPacket.h" />
     <ClInclude Include="Server.h" />
   </ItemGroup>
   <ItemGroup>

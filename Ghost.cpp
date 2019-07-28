@@ -1,6 +1,6 @@
 #include "Ghost.h"
 
-Ghost::Ghost(std::string id_, unsigned char r, unsigned char g, unsigned char b): id(id_), velocity(0, 1)
+Ghost::Ghost(std::string id_, unsigned char r, unsigned char g, unsigned char b, std::string name_): id(id_), velocity(0, 1), name(name_)
 
 {
 	color.r = r;

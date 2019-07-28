@@ -1,7 +1,9 @@
 #include "NetworkHandler.h"
 
-NetworkHandler::NetworkHandler(sf::Mutex& mtx_, std::vector<Ghost>& ghosts_, const std::vector<Point>& points_, std::vector<Point>& foods_): mtx(mtx_), ghosts(ghosts_), points(points_),
-receiveThreadUDP(&NetworkHandler::receiveUDP, this), receiveThreadTCP(&NetworkHandler::receiveTCP, this), foods(foods_)
+NetworkHandler::NetworkHandler(sf::Mutex& mtx_, std::vector<Ghost>& ghosts_, const std::vector<Point>& points_, 
+	std::vector<Point>& foods_, std::string& name_, Program*& program_):
+	mtx(mtx_), ghosts(ghosts_), points(points_), receiveThreadUDP(&NetworkHandler::receiveUDP, this),
+	receiveThreadTCP(&NetworkHandler::receiveTCP, this), foods(foods_), name(name_), program(program_)
 
 {
 	udpSocket.setBlocking(true);
@@ -55,9 +57,18 @@ void NetworkHandler::sendClear()
 void NetworkHandler::sendCreate()
 
 {
-	CreateGhostPacket createGhostPacket(color.r, color.g, color.b);
+	CreateGhostPacket createGhostPacket(color.r, color.g, color.b, name);
 	sf::Packet packetSend;
 	packetSend << createGhostPacket;
+	tcpSocket.send(packetSend);
+}
+
+void NetworkHandler::sendReady()
+
+{
+	ReadyPacket readyPacket;
+	sf::Packet packetSend;
+	packetSend << readyPacket;
 	tcpSocket.send(packetSend);
 }
 
@@ -74,7 +85,7 @@ void NetworkHandler::sendUpdateSnakes(std::string id)
 
 {
 	sf::Packet packetSend;
-	CreateGhostPacket createGhostPacket(color.r, color.g, color.b);
+	CreateGhostPacket createGhostPacket(color.r, color.g, color.b, name);
 	createGhostPacket.first = 0;
 	packetSend << createGhostPacket;
 	socketMtxTCP.lock();
@@ -149,11 +160,15 @@ void NetworkHandler::receiveTCP()
 				CreateGhostPacket packet;
 				packetRecieve >> packet;
 				packetRecieve >> id;
-				mtx.lock();
-				std::cout << "Created ghost with " << id << std::endl;
-				ghosts.push_back(Ghost(id, packet.r, packet.g, packet.b));
-				if (packet.first) sendUpdateSnakes(id);
-				mtx.unlock();
+				if (findGhost(id) == -1)
+
+				{
+					mtx.lock();
+					std::cout << "Created ghost with " << id << std::endl;
+					ghosts.push_back(Ghost(id, packet.r, packet.g, packet.b, packet.ghostName));
+					if (packet.first) sendUpdateSnakes(id);
+					mtx.unlock();
+				}
 			}
 
 			if (msg == MCLR)
@@ -211,7 +226,50 @@ void NetworkHandler::receiveTCP()
 					int index = findGhost(id);
 					if (index != -1) ghosts.erase(ghosts.begin() + index);
 				}
+
+				for (int i = 0; i < ghosts.size(); i++)
+
+				{
+					ghosts[i].ready = 0;
+				}
+
+				program->area.ready = 0;
+
 				mtx.unlock();
+			}
+
+			if (msg == RDYP)
+
+			{
+				std::string id;
+				packetRecieve >> id;
+				mtx.lock();
+				int index = findGhost(id);
+				if (index != -1) ghosts[index].ready = 1;
+				mtx.unlock();
+			}
+
+			if (msg == RESP)
+
+			{
+				program->running = false;
+				mtx.lock();
+				for (int i = 0; i < ghosts.size(); i++)
+
+				{
+					ghosts[i].ready = 0;
+				}
+				program->area.ready = 0;
+				mtx.unlock();
+			}
+
+			if (msg == STAR)
+
+			{
+				program->resetAll();
+				program->snek->snekRekt = false;
+				program->running = true;
+				//program->reset();
 			}
 		}
 		packetRecieve.clear();

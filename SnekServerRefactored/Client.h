@@ -1,5 +1,7 @@
 #pragma once
 #include <SFML/Network.hpp>
+#include <list>
+#include "DroppedPacket.h"
 
 class Client
 
@@ -39,5 +41,6 @@ public:
 	sf::Clock clock;
 	//TCP Socket
 	std::shared_ptr<sf::TcpSocket> socket;
+	std::list<DroppedPacket> droppedPackets;
 private:
 };

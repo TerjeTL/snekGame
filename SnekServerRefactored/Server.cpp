@@ -40,6 +40,8 @@ int Server::mainLoop()
 					std::cout << "New TCP client on " << clients[last].ip << ":" << clients[last].tcpPort << " id: " << clients[last].id << std::endl;
 					std::cout << clients.size() << " client(s) connected" << std::endl;
 
+					if (running) inactive++;
+
 					sf::Packet sendPacket;
 					std::vector<int> color;
 					chooseColor(color);
@@ -134,10 +136,12 @@ int Server::mainLoop()
 							sendPacket << disconnectPacket << clients[i].id;
 							broadcastTCP(sendPacket, i);
 							std::cout << clients[i].id << " disconnected. " << clients.size() - 1 << " client(s) remaining" << std::endl << std::endl;
+							serverReset();
 							selector.remove(*clients[i].socket);
+							if (i < usedColors.size()) usedColors.erase(usedColors.begin() + i);
 							clients.erase(clients.begin() + i);
 							i--;
-							if (clients.size() == 0) foods.clear();
+							if (clients.size() == 0) foods.clear(), usedColors.clear();
 						}
 
 						else
@@ -154,6 +158,36 @@ int Server::mainLoop()
 								//std::cout << "Food " << eatPacket.index << " eaten" << std::endl;
 								if (eatPacket.index < foods.size()) foods.erase(foods.begin() + eatPacket.index);
 								updateFood();
+							}
+
+							else if (msg == RDYP)
+
+							{
+								recievePacket << clients[i].id;
+								ready++;
+								std::cout << clients[i].id << " readied up! " << ready << " out of " << clients.size() << std::endl << running << std::endl;
+								broadcastTCP(recievePacket, i);
+								
+							}
+
+							else if (msg == MCLR)
+
+							{
+								if (clients.size() > 1)
+
+								{
+									reset++;
+									recievePacket << clients[i].id;
+									broadcastTCP(recievePacket, i);
+									std::cout << reset << " dead" << std::endl;
+
+									if ((reset + 1) >= (clients.size() - inactive))
+
+									{
+										shouldReset = 1;
+										//resetClock.restart();
+									}
+								}
 							}
 
 							else
@@ -178,10 +212,61 @@ int Server::mainLoop()
 				createFood();
 				if (clients.size() == 0) foods.clear();
 			}
+
+			sendDroppedPackets();
+
+			if (ready >= (clients.size() - inactive) && !running && clients.size() != 0)
+
+			{
+				StartPacket startPacket;
+				sf::Packet sendPacket;
+				sendPacket << startPacket;
+				broadcastTCP(sendPacket);
+				running = 1;
+			}
+
+			if (shouldReset)
+
+			{
+				std::cout << "We have a winner! Reseting..." << std::endl;
+				serverReset();
+			}
 		}
 	}
 
 	return 0;
+}
+
+void Server::sendDroppedPackets()
+
+{
+	for (int i = 0; i < clients.size(); i++)
+
+	{
+		if (clients[i].droppedPackets.size() > 0)
+
+		{
+			DroppedPacket packet = clients[i].droppedPackets.front();
+			clients[i].droppedPackets.pop_front();
+			broadcastTCP(packet.packet, packet.index, packet.me);
+		}
+	}
+}
+
+void Server::serverReset()
+
+{
+	shouldReset = 0;
+	reset = 0;
+	ready = 0;
+	running = 0;
+	inactive = 0;
+	ResetPacket resetPacket;
+	sf::Packet sendPacket;
+	sendPacket << resetPacket;
+	broadcastTCP(sendPacket);
+	foods.clear();
+	updateFood();
 }
 
 int Server::getUDPClient(const sf::IpAddress& ip, const unsigned short& port)
@@ -206,8 +291,28 @@ void Server::broadcastTCP(sf::Packet packet, int index, int me)
 	for (int i = 0; i < clients.size(); i++)
 
 	{
-		if (index != i && !me) clients[i].socket->send(packet);
-		else if (me && i == index) clients[i].socket->send(packet);
+		if (index != i && !me) 
+
+		{
+			sf::Socket::Status status = clients[i].socket->send(packet);
+			if (status != sf::Socket::Done && status != sf::Socket::Disconnected)
+
+			{
+				std::cout << "Dropped packet!" << std::endl;
+				clients[i].droppedPackets.push_back(DroppedPacket(index, me,packet));
+			}
+		}
+		else if (me && i == index)
+
+		{
+			sf::Socket::Status status = clients[i].socket->send(packet);
+			if (status != sf::Socket::Done && status != sf::Socket::Disconnected)
+
+			{
+				std::cout << "Dropped packet!" << std::endl;
+				clients[i].droppedPackets.push_back(DroppedPacket(index, me, packet));
+			}
+		}
 	}
 }
 
@@ -270,11 +375,11 @@ void Server::generateID(std::string& s)
 void Server::createFood()
 
 {
-	if (foodClock.getElapsedTime().asSeconds() > 10.0 && clients.size() > 0)
+	if (foodClock.getElapsedTime().asSeconds() > 10.0 && clients.size() > 0 && running)
 
 	{
-		int positionX = randomInt(50, 850);
-		int positionY = randomInt(50, 850);
+		int positionX = randomInt(50, 650);
+		int positionY = randomInt(50, 650);
 		foods.push_back(Point(Vec2f(positionX, positionY), randomInt(1, 10), 6));
 		foodClock.restart();
 		updateFood();

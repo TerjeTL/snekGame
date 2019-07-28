@@ -27,13 +27,13 @@ sf::Packet& operator >>(sf::Packet& packet, PointPacket& point)
 sf::Packet& operator <<(sf::Packet& packet, const CreateGhostPacket& create)
 
 {
-	return packet << create.name << create.first << create.r << create.g << create.b;
+	return packet << create.name << create.first << create.r << create.g << create.b << create.ghostName;
 }
 
 sf::Packet& operator >>(sf::Packet& packet, CreateGhostPacket& create)
 
 {
-	return packet >> create.first >> create.r >> create.g >> create.b;
+	return packet >> create.first >> create.r >> create.g >> create.b >> create.ghostName;
 }
 
 sf::Packet& operator <<(sf::Packet& packet, const ClearPacket& clear)
@@ -88,4 +88,22 @@ sf::Packet& operator >>(sf::Packet& packet, EatPacket& eat)
 
 {
 	return packet >> eat.index;
+}
+
+sf::Packet& operator <<(sf::Packet& packet, const ReadyPacket& rdy)
+
+{
+	return packet << rdy.name;
+}
+
+sf::Packet& operator <<(sf::Packet& packet, const ResetPacket& rst)
+
+{
+	return packet << rst.name;
+}
+
+sf::Packet& operator <<(sf::Packet& packet, const StartPacket& start)
+
+{
+	return packet << start.name;
 }

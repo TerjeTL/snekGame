@@ -1,18 +1,22 @@
 #include "program.h"
 
 
-Program::Program(int width, int height) : w(width), h(height), area(width, height, height - 100, 5),
-activatorSize(6), running(true), snek(area, networkHandler, mtx, qtree), networkHandler(mtx, ghosts, snek.points, foods),
-spawnTimer(4)
+Program::Program(int width, int height) : w(width), h(height), area(width, height, height - 100, 5, ghosts),
+activatorSize(6), running(false),
+spawnTimer(4), me(this)
 {
-	snek.body.setFillColor(sf::Color::Green);
+	
 	//ghosts.push_back(Ghost());
 	/*snakes.push_back(Snek(area));
 	snakes[1].body.setFillColor(sf::Color::Red);*/
 
 	qtree = new QuadTree(Boundary(width, height, width / 2, height / 2), 10);
-
+	//networkHandler.ptrSet(std::shared_ptr<Program>(this));
 	//std::cout << colors[0][1] << std::endl;
+
+	snek = std::shared_ptr<Snek>(new Snek(area, mtx, qtree, me));
+	snek->body.setFillColor(sf::Color::Green);
+	area.name = &snek->name;
 }
 
 Program::~Program()
@@ -25,20 +29,56 @@ Program::~Program()
 	}
 }
 
+void Program::getName()
+
+{
+	int nameOkay = 0;
+	std::string s;
+	while (!nameOkay)
+
+	{
+		std::cout << "Please enter the name of your snake: ";
+		getline(std::cin, s);
+
+		if (s.length() == 0)
+
+		{
+			s = "unamed";
+			nameOkay = 1;
+		}
+
+		else if (s.length() > 15)
+
+		{
+			std::cout << "Name must be less than 15 characters!" << std::endl;
+		}
+
+		else
+
+		{
+			nameOkay = 1;
+		}
+	}
+
+	snek->name = s;
+}
+
 int Program::mainLoop()
 {
 	sf::Event events;
 	sf::Clock clockUpdate;
-	//NetworkHandler 
-	networkHandler.connect("82.47.120.89", 5000);
 
+	getName();
+
+	//NetworkHandler 
+	networkHandler = std::shared_ptr<NetworkHandler>(new NetworkHandler(mtx, ghosts, snek->points, foods, snek->name, me));
+	networkHandler->connect("82.47.120.89", 5000);
 	window.create(sf::VideoMode(w, h), "Sneky boi");
 	
 	if (!window.isOpen())
 	{
 		return EXIT_FAILURE;
 	}
-	
 
 	while (window.isOpen())
 	{
@@ -52,7 +92,7 @@ int Program::mainLoop()
 			eventHandler(events);
 		}
 
-		if (clockUpdate.getElapsedTime().asSeconds() >= 1.0 / 60.0 && running)
+		if (clockUpdate.getElapsedTime().asSeconds() >= 1.0 / 60.0)
 		{
 			update();
 			clockUpdate.restart();
@@ -69,17 +109,17 @@ int Program::mainLoop()
 		window.display();
 	}
 
-	networkHandler.quitConnection();
+	networkHandler->quitConnection();
 	std::cout << "Shutting down" << std::endl;
 	return EXIT_SUCCESS;
 }
 
-void Program::spawnFood(Snek snek) // i have no idea if this mitosis stuff will work with networking
+void Program::spawnFood() // i have no idea if this mitosis stuff will work with networking
 
 {
 	int spawnTimerCopy = spawnTimer;
-	if (snek.mitosisClock.getElapsedTime().asSeconds() < 4 && snek.mitosis) spawnTimerCopy = 1;
-	else snek.mitosis = false;
+	if (snek->mitosisClock.getElapsedTime().asSeconds() < 4 && snek->mitosis) spawnTimerCopy = 1;
+	else snek->mitosis = false;
 
 	if (spawnClock.getElapsedTime().asSeconds() > spawnTimerCopy)
 	{
@@ -96,55 +136,66 @@ void Program::spawnFood(Snek snek) // i have no idea if this mitosis stuff will 
 
 void Program::update()
 {
-	if (qtree != nullptr) delete qtree;
-	qtree = new QuadTree(Boundary(w, h, w / 2, h / 2), 10);
-	int loop = 0;
-	if (snek.points.size() > 10) loop = 1;
+	networkHandler->sendDroppedPacket();
 
-	for (int i = 0; i < snek.points.size() - 10 && loop; i++)
-
-	{
-		qtree->insert(Point(snek.points[i].position, snek.points[i].type, snek.points[i].radius));
-	}
-
-	for (int i = 0; i < ghosts.size(); i++)
-
-	{
-		for (int j = 0; j < ghosts[i].points.size(); j++)
-
-		{
-			qtree->insert(Point(ghosts[i].points[j].position, ghosts[i].points[j].type, ghosts[i].points[j].radius));
-		}
-	}
-
-	for (int i = 0; i < foods.size(); i++)
-
-	{
-		qtree->insert(Point(foods[i].position, foods[i].type, foods[i].radius, foods[i].id, foods[i].serverID));
-	}
-
-	if (snek.snekRekt)
+	if (snek->snekRekt && running)
 
 	{
 		running = false;
+		networkHandler->sendClear();
 	}
-	snek.update(ghosts, area, foods);
 
-	for (int i = 0; i < ghosts.size(); i++)
+	if (running)
 
 	{
-		ghosts[i].update();
+		if (qtree != nullptr) delete qtree;
+		qtree = new QuadTree(Boundary(w, h, w / 2, h / 2), 10);
+		int loop = 0;
+		if (snek->points.size() > 10) loop = 1;
+
+		for (int i = 0; i < snek->points.size() - 10 && loop; i++)
+
+		{
+			qtree->insert(Point(snek->points[i].position, snek->points[i].type, snek->points[i].radius));
+		}
+
+		for (int i = 0; i < ghosts.size(); i++)
+
+		{
+			for (int j = 0; j < ghosts[i].points.size(); j++)
+
+			{
+				qtree->insert(Point(ghosts[i].points[j].position, ghosts[i].points[j].type, ghosts[i].points[j].radius));
+			}
+		}
+
+		for (int i = 0; i < foods.size(); i++)
+
+		{
+			qtree->insert(Point(foods[i].position, foods[i].type, foods[i].radius, foods[i].id, foods[i].serverID));
+		}
+
+		snek->update(ghosts, area, foods);
+
+		for (int i = 0; i < ghosts.size(); i++)
+
+		{
+			ghosts[i].update();
+		}
 	}
 	
-	networkHandler.sendDroppedPacket();
+	
+
 	//spawnFood(snek);
 }
 
 void Program::draw()
 {
+	
+
 	//mtx.lock();
 	area.draw(window);
-	snek.draw(window);
+	snek->draw(window, area);
 	mtx.lock();
 	std::vector<Ghost> ghostsCopy = ghosts;
 	mtx.unlock();
@@ -175,28 +226,40 @@ void Program::draw()
 void Program::reset()
 
 {
-	if (snek.snekRekt == true || running == false)
+	if (snek->snekRekt || !running)
 
 	{
-		snek.points.clear();
-		snek.resetPos(area);
-		snek.snekRekt = false;
-		running = true;
+		snek->points.clear();
+		snek->resetPos(area);
+		//snek->snekRekt = false;
+		//running = true;
 		//foods.clear();
-		networkHandler.sendClear();
+		//networkHandler->sendClear();
 	}
+}
+
+void Program::resetAll()
+
+{
+	running = false;
+	for (int i = 0; i < ghosts.size(); i++)
+
+	{
+		ghosts[i].points.clear();
+	}
+	reset();
 }
 
 void Program::eventHandler(sf::Event events) // This needs a rework. Especially the revsnek solution is messy. should be simple to make it at least 100% better. later....
 {
 	float rot = (float)0.0;
 
-	if (!snek.squareSnek || snek.squareSnekTimer.getElapsedTime().asSeconds() > 10)
+	if (!snek->squareSnek || snek->squareSnekTimer.getElapsedTime().asSeconds() > 10)
 	{
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) rot--;
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) rot++;
-		snek.setRotAngle(rot);
-		snek.squareSnek = false;
+		snek->setRotAngle(rot);
+		snek->squareSnek = false;
 	}
 	else
 	{
@@ -206,19 +269,19 @@ void Program::eventHandler(sf::Event events) // This needs a rework. Especially 
 			{
 			case sf::Keyboard::A:
 			{
-				if (snek.revSnek) snek.velocity.rotateInPlaze(PI / 2);
-				else snek.velocity.rotateInPlaze(-PI / 2);
+				if (snek->revSnek) snek->velocity.rotateInPlaze(PI / 2);
+				else snek->velocity.rotateInPlaze(-PI / 2);
 				break;
 			}
 			case sf::Keyboard::D:
 			{
-				if (snek.revSnek) snek.velocity.rotateInPlaze(-PI / 2);
-				else snek.velocity.rotateInPlaze(PI / 2);
+				if (snek->revSnek) snek->velocity.rotateInPlaze(-PI / 2);
+				else snek->velocity.rotateInPlaze(PI / 2);
 				break;
 			}
 			}
 		}
-		snek.setRotAngle(rot);
+		snek->setRotAngle(rot);
 	}
 
 	if (events.type == sf::Event::EventType::KeyPressed)
@@ -227,7 +290,22 @@ void Program::eventHandler(sf::Event events) // This needs a rework. Especially 
 		if (events.key.code == sf::Keyboard::Space)
 
 		{
-			reset();
+			//reset();
+			if (ghosts.size() > 0)
+
+			{
+				if (area.ready == 0) networkHandler->sendReady();
+				area.ready = 1;
+			}
+
+			else
+
+			{
+				reset();
+				running = true;
+			}
+			
+			
 		}
 	}
 }
