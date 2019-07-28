@@ -49,6 +49,7 @@ private:
 	sf::Mutex& mtx;
 	sf::Clock spacer, speedSnekClock, fatSnekClock, updateClock, sendPosClock, sendPointClock;
 	sf::Color color;
+	sf::VertexArray drawPoints;
 	int randDist, pointsAllowed;
 	bool allowedToMakePoint;
 	float rotAngle;

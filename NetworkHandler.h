@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <Maths.h>
+#include <list>
 #include "Packets.h"
 #include "Point.h"
 #include "Ghost.h"
@@ -20,6 +21,8 @@ public:
 	void sendCreate();
 	void sendEat(int index);
 	void sendUpdateSnakes(std::string id);
+	void sendPacket(sf::Packet& packet);
+	void sendDroppedPacket();
 	void connect(std::string ip, int port);
 	void quitConnection();
 	void bindUDPSocket(unsigned short port);
@@ -49,7 +52,7 @@ private:
 	sf::Clock pointClock;
 	float pointRate = 1.0 / 40.0;
 
-	
+	std::list<sf::Packet> droppedPackets;
 
 	sf::IpAddress ip = "127.0.0.1";
 	int port = 5000;

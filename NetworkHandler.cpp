@@ -4,7 +4,8 @@ NetworkHandler::NetworkHandler(sf::Mutex& mtx_, std::vector<Ghost>& ghosts_, con
 receiveThreadUDP(&NetworkHandler::receiveUDP, this), receiveThreadTCP(&NetworkHandler::receiveTCP, this), foods(foods_)
 
 {
-	udpSocket.setBlocking(false);
+	udpSocket.setBlocking(true);
+	tcpSocket.setBlocking(true);
 }
 
 NetworkHandler::~NetworkHandler()
@@ -48,9 +49,7 @@ void NetworkHandler::sendClear()
 	ClearPacket clearPacket;
 	sf::Packet packetSend;
 	packetSend << clearPacket;
-	tcpSocket.setBlocking(true);
 	tcpSocket.send(packetSend);
-	tcpSocket.setBlocking(false);
 }
 
 void NetworkHandler::sendCreate()
@@ -89,6 +88,31 @@ void NetworkHandler::sendUpdateSnakes(std::string id)
 		pointPacket.id = id;
 		packetSend << pointPacket;
 		udpSocket.send(packetSend, ip, port);
+	}
+}
+
+void NetworkHandler::sendPacket(sf::Packet& packet)
+
+{
+	socketMtxTCP.lock();
+	if (tcpSocket.send(packet) != sf::Socket::Done)
+
+	{
+		droppedPackets.push_back(packet);
+	}
+	socketMtxTCP.unlock();
+}
+
+void NetworkHandler::sendDroppedPacket()
+
+{
+	if (droppedPackets.size() > 0)
+
+	{
+		sf::Packet packet = droppedPackets.front();
+		droppedPackets.pop_front();
+		sendPacket(packet);
+		std::cout << "Resending dropped packet!" << std::endl;
 	}
 }
 
@@ -202,11 +226,11 @@ void NetworkHandler::receiveUDP()
 
 	{
 		packetRecieve.clear();
-		socketMtxUDP.lock();
+		//socketMtxUDP.lock();
 		sf::IpAddress sender;
 		unsigned short senderPort;
 		int ready = (udpSocket.receive(packetRecieve, sender, senderPort) == sf::Socket::Done);
-		socketMtxUDP.unlock();
+		//socketMtxUDP.unlock();
 
 		if (ready)
 
@@ -346,6 +370,10 @@ void NetworkHandler::quitConnection()
 	//socketMtxTCP.lock();
 	//tcpSocket.disconnect();
 	//socketMtxTCP.unlock();
+	socketMtxUDP.lock();
+	udpSocket.unbind();
+	socketMtxUDP.unlock();
+
 	socketMtxTCP.lock();
 	DisconnectPacket disconnectPacket;
 	sf::Packet sendPacket;

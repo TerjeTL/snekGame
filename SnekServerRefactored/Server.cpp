@@ -13,6 +13,7 @@ int Server::mainLoop()
 	udpSocket.bind(5000);
 	selector.add(listener);
 	selector.add(udpSocket);
+	std::cout << "Server running..." << std::endl << std::endl;
 	while (!quit)
 
 	{
@@ -37,7 +38,7 @@ int Server::mainLoop()
 					clients[last].tcpSetup(id);
 					//Console
 					std::cout << "New TCP client on " << clients[last].ip << ":" << clients[last].tcpPort << " id: " << clients[last].id << std::endl;
-					std::cout << clients.size() << " clients connected" << std::endl;
+					std::cout << clients.size() << " client(s) connected" << std::endl;
 
 					sf::Packet sendPacket;
 					std::vector<int> color;
@@ -83,7 +84,7 @@ int Server::mainLoop()
 
 							{
 								clients[i].udpPort = port;
-								std::cout << "Client " << id << " on " << ip << ":" << port << " connected on UDP" << std::endl;
+								std::cout << "Client " << id << " on " << ip << ":" << port << " connected on UDP" << std::endl << std::endl;
 								break;
 							}
 						}
@@ -132,10 +133,11 @@ int Server::mainLoop()
 							sf::Packet sendPacket;
 							sendPacket << disconnectPacket << clients[i].id;
 							broadcastTCP(sendPacket, i);
-							std::cout << clients[i].id << " disconnected. " << clients.size() - 1 << " clients remaining" << std::endl;
+							std::cout << clients[i].id << " disconnected. " << clients.size() - 1 << " client(s) remaining" << std::endl << std::endl;
 							selector.remove(*clients[i].socket);
 							clients.erase(clients.begin() + i);
 							i--;
+							if (clients.size() == 0) foods.clear();
 						}
 
 						else
@@ -149,7 +151,7 @@ int Server::mainLoop()
 							{
 								EatPacket eatPacket;
 								copy >> eatPacket;
-								std::cout << "Food " << eatPacket.index << " eaten" << std::endl;
+								//std::cout << "Food " << eatPacket.index << " eaten" << std::endl;
 								if (eatPacket.index < foods.size()) foods.erase(foods.begin() + eatPacket.index);
 								updateFood();
 							}
@@ -174,6 +176,7 @@ int Server::mainLoop()
 				broadcastTCP(sendPacket);
 				ping.restart();
 				createFood();
+				if (clients.size() == 0) foods.clear();
 			}
 		}
 	}
@@ -318,7 +321,7 @@ void Server::chooseColor(std::vector<int>& color)
 		if (val) used = 1, index = randomInt(0, colors.size() - 1);
 		else used = 0;
 	}
-	
+	usedColors.push_back(index);
 	color = colors[index];
 }
 

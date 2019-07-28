@@ -21,6 +21,8 @@ public:
 	void update();
 	void correctPos();
 	sf::Color color = sf::Color(255, 255, 255);
+	sf::CircleShape circle;
+	sf::VertexArray drawPoints;
 
 private:
 };
