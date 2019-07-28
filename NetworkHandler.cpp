@@ -350,9 +350,10 @@ void NetworkHandler::connect(std::string ip_, int port_)
 		udpSocket.send(sendPacket, ip, port);
 	}
 
-	sf::Packet packet;
-	packet << CreateGhostPacket(color.r, color.g, color.b);
-	tcpSocket.send(packet);
+	//sf::Packet packet;
+	//packet << CreateGhostPacket(color.r, color.g, color.b);
+	//tcpSocket.send(packet);
+	sendCreate();
 	connected = 1;
 
 	receiveThreadUDP.launch();

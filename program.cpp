@@ -31,7 +31,6 @@ int Program::mainLoop()
 	sf::Clock clockUpdate;
 	//NetworkHandler 
 	networkHandler.connect("127.0.0.1", 5000);
-	networkHandler.sendCreate();
 
 	window.create(sf::VideoMode(w, h), "Sneky boi");
 	
