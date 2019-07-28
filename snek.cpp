@@ -58,32 +58,44 @@ void Snek::posUpdate()
 
 void Snek::snekBodyUpdate()
 {
+	pointSpacing = 2.0;
+
 	if (wooshTimer.getElapsedTime().asSeconds() > 10) wooshSnek = false;
 	if (noHolesClock.getElapsedTime().asSeconds() > 10) noHoles = false;
 
 	if (spacer.getElapsedTime().asSeconds() > randSpacer) //All that random numbers jazz
 	{
-		dist = 0;
 		spacer.restart();
+		distHoles = 0;
 		randSpacer = randNumber(1.6, 0.6);
 		randDist = randomInt(3 * bodySize + 9, 3 * bodySize + 25);
 		//std::cout << randDist << std::endl;
 
 	}
 
-	if (((dist < randDist) && !noHoles) || wooshSnek) // if/else -> points push-back.
+	//if (((dist < randDist) && !noHoles) || wooshSnek) // if/else -> points push-back.
+	//{
+	//	spacer.restart();
+	//	pointsAllowed = 0;
+	//}
+
+	if ((distHoles < randDist) && !noHoles || wooshSnek)
+
 	{
 		spacer.restart();
 		pointsAllowed = 0;
 	}
-	else
+
+	else if (dist > pointSpacing)
 	{
 		points.push_back(Point(position, SNAKE, bodySize));
+		dist = 0;
 		pointsAllowed = 1;
 		//networkHandler.sendPoint(Point(position, SNAKE, bodySize));
 	}
-	dist += distance(prev, position);
-	//std::cout << snek.dist << std::endl;
+	float d = distance(prev, position);
+	dist += d;
+	distHoles += d;
 	prev = position;
 }
 
@@ -183,7 +195,7 @@ void Snek::draw(sf::RenderWindow& window)
 			Vec2f prev = points[i - 1].position;
 			Vec2f diff = pos - prev;
 
-			if (diff.magnitudeInPlace() < 5.0)
+			if (diff.magnitudeInPlace() < 5)
 
 			{
 				float angle = atan(diff.y / diff.x);

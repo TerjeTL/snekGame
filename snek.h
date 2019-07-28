@@ -54,7 +54,8 @@ private:
 	bool allowedToMakePoint;
 	float rotAngle;
 	float randSpacer;
-	float dist;
+	float dist, distHoles;
+	float pointSpacing = 5;
 	NetworkHandler& networkHandler;
 	Vec2f prev;
 	QuadTree*& qtree;
