@@ -175,7 +175,7 @@ void Program::draw()
 void Program::reset()
 
 {
-	if (snek.snekRekt == true)
+	if (snek.snekRekt == true || running == false)
 
 	{
 		snek.points.clear();
