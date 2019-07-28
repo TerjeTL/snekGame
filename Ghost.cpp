@@ -48,7 +48,7 @@ void Ghost::draw(sf::RenderWindow& window)
 			Vec2f prev = points[i - 1].position;
 			Vec2f diff = pos - prev;
 
-			if (diff.magnitudeInPlace() < 5.0)
+			if (diff.magnitudeInPlace() < 6.0)
 
 			{
 				float angle = atan(diff.y / diff.x);
