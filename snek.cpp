@@ -58,7 +58,7 @@ void Snek::posUpdate()
 
 void Snek::snekBodyUpdate()
 {
-	pointSpacing = 2.0;
+	pointSpacing = 4.0;
 
 	if (wooshTimer.getElapsedTime().asSeconds() > 10) wooshSnek = false;
 	if (noHolesClock.getElapsedTime().asSeconds() > 10) noHoles = false;
@@ -195,7 +195,7 @@ void Snek::draw(sf::RenderWindow& window)
 			Vec2f prev = points[i - 1].position;
 			Vec2f diff = pos - prev;
 
-			if (diff.magnitudeInPlace() < 5)
+			if (diff.magnitudeInPlace() < 6)
 
 			{
 				float angle = atan(diff.y / diff.x);
