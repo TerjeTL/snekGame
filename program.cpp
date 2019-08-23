@@ -72,7 +72,10 @@ int Program::mainLoop()
 
 	//NetworkHandler 
 	networkHandler = std::shared_ptr<NetworkHandler>(new NetworkHandler(mtx, ghosts, snek->points, foods, snek->name, me));
-	networkHandler->connect("82.47.120.89", 5000);
+	unsigned short port;
+	std::cout << "Server port: ";
+	std::cin >> port;
+	networkHandler->connect("127.0.0.1", port);
 	window.create(sf::VideoMode(w, h), "Sneky boi");
 	
 	if (!window.isOpen())
